@@ -173,8 +173,8 @@ GPGPU-Sim uArch: performance model initialization complete.
 GPGPU-Sim PTX: __cudaRegisterFatBinary, fat_cubin_handle = 1, filename=mummergpu.cu
 self exe links to: /home/gpgpu-sim/ispass2009-benchmarks/bin/release/MUM
 Running md5sum using "md5sum /home/gpgpu-sim/ispass2009-benchmarks/bin/release/MUM "
-Running cuobjdump using "$CUDA_INSTALL_PATH/bin/cuobjdump -ptx -elf -sass /home/gpgpu-sim/ispass2009-benchmarks/bin/release/MUM > _cuobjdump_complete_output_f53dJR"
-Parsing file _cuobjdump_complete_output_f53dJR
+Running cuobjdump using "$CUDA_INSTALL_PATH/bin/cuobjdump -ptx -elf -sass /home/gpgpu-sim/ispass2009-benchmarks/bin/release/MUM > _cuobjdump_complete_output_IiUkiO"
+Parsing file _cuobjdump_complete_output_IiUkiO
 ######### cuobjdump parser ########
 ## Adding new section ELF
 Adding arch: sm_30
@@ -486,12 +486,12 @@ GPGPU-Sim PTX: ... end of reconvergence points for _Z17mummergpuRCKernelP10Match
 GPGPU-Sim PTX: ... done pre-decoding instructions for '_Z17mummergpuRCKernelP10MatchCoordPcPKiS3_ii'.
 GPGPU-Sim PTX: finished parsing EMBEDDED .ptx file _1.ptx
 Adding _cuobjdump_2.ptx with cubin handle 1
-GPGPU-Sim PTX: extracting embedded .ptx to temporary file "_ptx_2MHciA"
-Running: cat _ptx_2MHciA | sed 's/.version 1.5/.version 1.4/' | sed 's/, texmode_independent//' | sed 's/\(\.extern \.const\[1\] .b8 \w\+\)\[\]/\1\[1\]/' | sed 's/const\[.\]/const\[0\]/g' > _ptx2_sqTgRi
-GPGPU-Sim PTX: generating ptxinfo using "$CUDA_INSTALL_PATH/bin/ptxas --gpu-name=sm_20 -v _ptx2_sqTgRi --output-file  /dev/null 2> _ptx_2MHciAinfo"
+GPGPU-Sim PTX: extracting embedded .ptx to temporary file "_ptx_kkjkzd"
+Running: cat _ptx_kkjkzd | sed 's/.version 1.5/.version 1.4/' | sed 's/, texmode_independent//' | sed 's/\(\.extern \.const\[1\] .b8 \w\+\)\[\]/\1\[1\]/' | sed 's/const\[.\]/const\[0\]/g' > _ptx2_HKioQC
+GPGPU-Sim PTX: generating ptxinfo using "$CUDA_INSTALL_PATH/bin/ptxas --gpu-name=sm_20 -v _ptx2_HKioQC --output-file  /dev/null 2> _ptx_kkjkzdinfo"
 GPGPU-Sim PTX: Kernel '_Z15mummergpuKernelP10MatchCoordPcPKiS3_ii' : regs=22, lmem=0, smem=0, cmem=72
 GPGPU-Sim PTX: Kernel '_Z17mummergpuRCKernelP10MatchCoordPcPKiS3_ii' : regs=21, lmem=0, smem=0, cmem=72
-GPGPU-Sim PTX: removing ptxinfo using "rm -f _ptx_2MHciA _ptx2_sqTgRi _ptx_2MHciAinfo"
+GPGPU-Sim PTX: removing ptxinfo using "rm -f _ptx_kkjkzd _ptx2_HKioQC _ptx_kkjkzdinfo"
 GPGPU-Sim PTX: loading globals with explicit initializers... 
 GPGPU-Sim PTX: finished loading globals (0 bytes total).
 GPGPU-Sim PTX: loading constants with explicit initializers...  done.
