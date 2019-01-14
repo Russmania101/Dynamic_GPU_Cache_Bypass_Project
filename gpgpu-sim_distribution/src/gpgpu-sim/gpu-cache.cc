@@ -155,6 +155,7 @@ void tag_array::init( int core_id, int type_id )
     m_type_id = type_id;
 }
 
+// steffygm - cache probe LOOP
 enum cache_request_status tag_array::probe( new_addr_type addr, unsigned &idx ) const {
     //assert( m_config.m_write_policy == READ_ONLY );
     unsigned set_index = m_config.set_index(addr);
@@ -1063,6 +1064,8 @@ data_cache::process_tag_probe( bool wr,
 // of caching policies.
 // Both the L1 and L2 override this function to provide a means of
 // performing actions specific to each cache when such actions are implemnted.
+// steffygm - access function for cache
+// 		return status for request
 enum cache_request_status
 data_cache::access( new_addr_type addr,
                     mem_fetch *mf,
