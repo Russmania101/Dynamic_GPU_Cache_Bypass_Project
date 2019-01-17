@@ -9,1243 +9,426 @@
 .target sm_30
 .address_size 64
 
-.file	1 "/tmp/tmpxft_00003f06_00000000-11_mummergpu.compute_30.cpp3.i"
-.file	2 "./mummergpu_kernel.cu"
-.file	3 "/home/gpgpu-sim/cuda/toolkit/4.2/cuda/nvvm/ci_include.h"
-.global .texref nodetex;
-.global .texref childrentex;
-.global .texref reftex;
+.file	1 "/tmp/tmpxft_00001bae_00000000-13_hotspot.compute_30.cpp3.i"
+.file	2 "hotspot.cu"
+.file	3 "/home/gpgpu-sim/cuda/toolkit/4.2/cuda/include/device_functions.h"
 
-.visible .func _Z10set_resultRK14TextureAddressP10MatchCoordiiii(
-.param .b64 _Z10set_resultRK14TextureAddressP10MatchCoordiiii_param_0,
-.param .b64 _Z10set_resultRK14TextureAddressP10MatchCoordiiii_param_1,
-.param .b32 _Z10set_resultRK14TextureAddressP10MatchCoordiiii_param_2,
-.param .b32 _Z10set_resultRK14TextureAddressP10MatchCoordiiii_param_3,
-.param .b32 _Z10set_resultRK14TextureAddressP10MatchCoordiiii_param_4,
-.param .b32 _Z10set_resultRK14TextureAddressP10MatchCoordiiii_param_5
+
+
+
+.entry _Z14calculate_tempiPfS_S_iiiiffffff(
+.param .u32 _Z14calculate_tempiPfS_S_iiiiffffff_param_0,
+.param .u64 _Z14calculate_tempiPfS_S_iiiiffffff_param_1,
+.param .u64 _Z14calculate_tempiPfS_S_iiiiffffff_param_2,
+.param .u64 _Z14calculate_tempiPfS_S_iiiiffffff_param_3,
+.param .u32 _Z14calculate_tempiPfS_S_iiiiffffff_param_4,
+.param .u32 _Z14calculate_tempiPfS_S_iiiiffffff_param_5,
+.param .u32 _Z14calculate_tempiPfS_S_iiiiffffff_param_6,
+.param .u32 _Z14calculate_tempiPfS_S_iiiiffffff_param_7,
+.param .f32 _Z14calculate_tempiPfS_S_iiiiffffff_param_8,
+.param .f32 _Z14calculate_tempiPfS_S_iiiiffffff_param_9,
+.param .f32 _Z14calculate_tempiPfS_S_iiiiffffff_param_10,
+.param .f32 _Z14calculate_tempiPfS_S_iiiiffffff_param_11,
+.param .f32 _Z14calculate_tempiPfS_S_iiiiffffff_param_12,
+.param .f32 _Z14calculate_tempiPfS_S_iiiiffffff_param_13
 )
 {
-.reg .pred %p<2>;
-.reg .s32 %r<19>;
-.reg .s64 %rl<5>;
-
-
-ld.param.u32 %r3, [_Z10set_resultRK14TextureAddressP10MatchCoordiiii_param_3];
-ld.param.u32 %r4, [_Z10set_resultRK14TextureAddressP10MatchCoordiiii_param_4];
-.loc 2 28 1
-setp.gt.s32 %p1, %r3, %r4;
-@%p1 bra BB0_2;
-
-.loc 2 39 2
-ret;
-
-BB0_2:
-ld.param.u64 %rl3, [_Z10set_resultRK14TextureAddressP10MatchCoordiiii_param_0];
-.loc 2 32 1
-ld.u16 %r5, [%rl3];
-shl.b32 %r7, %r5, 5;
-.loc 2 30 1
-ld.u16 %r8, [%rl3+2];
-shl.b32 %r10, %r8, 12;
-or.b32 %r11, %r10, %r8;
-.loc 2 32 1
-and.b32 %r12, %r11, 268304415;
-.loc 2 33 1
-add.s32 %r13, %r12, %r7;
-ld.param.u64 %rl4, [_Z10set_resultRK14TextureAddressP10MatchCoordiiii_param_1];
-.loc 2 36 1
-st.u32 [%rl4], %r13;
-ld.param.u32 %r17, [_Z10set_resultRK14TextureAddressP10MatchCoordiiii_param_2];
-ld.param.u32 %r18, [_Z10set_resultRK14TextureAddressP10MatchCoordiiii_param_5];
-.loc 2 35 1
-or.b32 %r15, %r18, %r17;
-.loc 2 37 1
-st.u16 [%rl4+4], %r15;
-.loc 2 39 2
-ret;
-}
-
-.visible .func (.param .b32 func_retval0) _Z6getRefi(
-.param .b32 _Z6getRefi_param_0
-)
-{
-.reg .f32 %f<3>;
-.reg .s32 %r<15>;
-
-
-ld.param.u32 %r5, [_Z6getRefi_param_0];
-shr.s32 %r6, %r5, 16;
-and.b32 %r7, %r6, -4;
-.loc 2 45 1
-and.b32 %r8, %r5, 3;
-or.b32 %r9, %r7, %r8;
-shr.u32 %r10, %r5, 2;
-and.b32 %r11, %r10, 65535;
-.loc 2 47 1
-cvt.rn.f32.s32 %f1, %r11;
-cvt.rn.f32.s32 %f2, %r9;
-mov.u32 %r12, 0;
-
-	tex.2d.v4.s32.f32 {%r1, %r2, %r3, %r4}, [reftex, {%f1, %f2}];
-
-	.loc 2 47 1
-shl.b32 %r13, %r1, 24;
-shr.s32 %r14, %r13, 24;
-st.param.b32	[func_retval0+0], %r14;
-ret;
-}
-
-.visible .func (.param .b32 func_retval0) _Z2rcc(
-.param .b32 _Z2rcc_param_0
-)
-{
-.reg .pred %p<7>;
-.reg .s32 %r<7>;
+.reg .f32 %f<26>;
+.reg .f64 %fd<16>;
+.reg .pred %p<29>;
+.reg .s32 %r<160>;
+.reg .s64 %rl<61>;
 .reg .s16 %rc<8>;
 
+	.shared .align 4 .b8 __cuda_local_var_17168_39_non_const_temp_on_cuda[1024];
 
-ld.param.u8 %rc1, [_Z2rcc_param_0];
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc1;
-mov.b16 %temp2, 70;
-cvt.s16.s8 %temp2, %temp2;
-setp.gt.s16 %p1, %temp1, %temp2;
-}
-@%p1 bra BB2_4;
+	.shared .align 4 .b8 __cuda_local_var_17169_39_non_const_power_on_cuda[1024];
 
-ld.param.u8 %rc4, [_Z2rcc_param_0];
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc4;
-mov.b16 %temp2, 65;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p5, %temp1, %temp2;
-}
-@%p5 bra BB2_10;
+	.shared .align 4 .b8 __cuda_local_var_17170_39_non_const_temp_t[1024];
 
-ld.param.u8 %rc3, [_Z2rcc_param_0];
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc3;
-mov.b16 %temp2, 67;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p6, %temp1, %temp2;
-}
-@%p6 bra BB2_3;
-bra.uni BB2_11;
+ld.param.u32 %r1, [_Z14calculate_tempiPfS_S_iiiiffffff_param_0];
+ld.param.u32 %r2, [_Z14calculate_tempiPfS_S_iiiiffffff_param_4];
+ld.param.u32 %r3, [_Z14calculate_tempiPfS_S_iiiiffffff_param_5];
+ld.param.u32 %r4, [_Z14calculate_tempiPfS_S_iiiiffffff_param_6];
+ld.param.u32 %r5, [_Z14calculate_tempiPfS_S_iiiiffffff_param_7];
+ld.param.f32 %f5, [_Z14calculate_tempiPfS_S_iiiiffffff_param_8];
+ld.param.f32 %f6, [_Z14calculate_tempiPfS_S_iiiiffffff_param_9];
+ld.param.f32 %f7, [_Z14calculate_tempiPfS_S_iiiiffffff_param_10];
+ld.param.f32 %f8, [_Z14calculate_tempiPfS_S_iiiiffffff_param_11];
+ld.param.f32 %f9, [_Z14calculate_tempiPfS_S_iiiiffffff_param_12];
+.loc 2 127 1
+mov.u32 %r13, %ctaid.x;
+.loc 3 1311 3
+div.rn.f32 %f1, %f9, %f5;
+.loc 2 135 1
+rcp.rn.f32 %f2, %f6;
+.loc 2 136 1
+rcp.rn.f32 %f3, %f7;
+.loc 2 137 1
+rcp.rn.f32 %f4, %f8;
+shl.b32 %r14, %r1, 1;
+mov.u32 %r15, 16;
+.loc 2 145 1
+sub.s32 %r16, %r15, %r14;
+.loc 2 128 1
+mov.u32 %r17, %ctaid.y;
+.loc 2 150 1
+mul.lo.s32 %r18, %r17, %r16;
+sub.s32 %r6, %r18, %r5;
+.loc 2 151 1
+mul.lo.s32 %r19, %r13, %r16;
+sub.s32 %r7, %r19, %r4;
+add.s32 %r8, %r6, 15;
+add.s32 %r9, %r7, 15;
+.loc 2 131 1
+mov.u32 %r20, %tid.y;
+.loc 2 156 1
+add.s32 %r21, %r6, %r20;
+.loc 2 130 1
+mov.u32 %r22, %tid.x;
+.loc 2 157 1
+add.s32 %r23, %r7, %r22;
+.loc 2 161 1
+mad.lo.s32 %r10, %r21, %r2, %r23;
+setp.gt.s32 %p1, %r21, -1;
+add.s32 %r24, %r3, -1;
+.loc 2 163 1
+setp.le.s32 %p2, %r21, %r24;
+and.pred %p3, %p1, %p2;
+.loc 2 163 1
+@!%p3 bra BB0_3;
 
-BB2_3:
-mov.u32 %r4, 71;
-.loc 2 60 1
-st.param.b32	[func_retval0+0], %r4;
-ret;
+ld.param.u32 %r137, [_Z14calculate_tempiPfS_S_iiiiffffff_param_0];
+shl.b32 %r26, %r137, 1;
+.loc 2 145 1
+sub.s32 %r28, %r15, %r26;
+.loc 2 127 1
+mov.u32 %r149, %ctaid.x;
+.loc 2 151 1
+mul.lo.s32 %r29, %r149, %r28;
+ld.param.u32 %r146, [_Z14calculate_tempiPfS_S_iiiiffffff_param_6];
+.loc 2 151 1
+sub.s32 %r30, %r29, %r146;
+.loc 2 130 1
+mov.u32 %r156, %tid.x;
+.loc 2 157 1
+add.s32 %r32, %r30, %r156;
+setp.gt.s32 %p4, %r32, -1;
+ld.param.u32 %r141, [_Z14calculate_tempiPfS_S_iiiiffffff_param_4];
+add.s32 %r33, %r141, -1;
+.loc 2 163 1
+setp.le.s32 %p5, %r32, %r33;
+and.pred %p6, %p4, %p5;
+.loc 2 163 1
+@!%p6 bra BB0_3;
 
-BB2_4:
-ld.param.u8 %rc7, [_Z2rcc_param_0];
+ld.param.u64 %rl59, [_Z14calculate_tempiPfS_S_iiiiffffff_param_2];
+cvta.to.global.u64 %rl8, %rl59;
+.loc 2 164 1
+mul.wide.s32 %rl9, %r10, 4;
+add.s64 %rl10, %rl8, %rl9;
+.loc 2 131 1
+mov.u32 %r152, %tid.y;
+mul.wide.s32 %rl11, %r152, 64;
+mov.u64 %rl12, __cuda_local_var_17168_39_non_const_temp_on_cuda;
+add.s64 %rl13, %rl12, %rl11;
+.loc 2 130 1
+mov.u32 %r155, %tid.x;
+mul.wide.s32 %rl14, %r155, 4;
+add.s64 %rl15, %rl13, %rl14;
+.loc 2 164 1
+ld.global.f32 %f10, [%rl10];
+st.shared.f32 [%rl15], %f10;
+ld.param.u64 %rl58, [_Z14calculate_tempiPfS_S_iiiiffffff_param_1];
+cvta.to.global.u64 %rl16, %rl58;
+.loc 2 165 1
+add.s64 %rl17, %rl16, %rl9;
+mov.u64 %rl18, __cuda_local_var_17169_39_non_const_power_on_cuda;
+add.s64 %rl19, %rl18, %rl11;
+add.s64 %rl20, %rl19, %rl14;
+.loc 2 165 1
+ld.global.f32 %f11, [%rl17];
+st.shared.f32 [%rl20], %f11;
+
+BB0_3:
+.loc 2 167 1
+bar.sync 0;
+.loc 2 172 1
+neg.s32 %r41, %r6;
+mov.u32 %r159, 0;
+.loc 2 172 1
+shr.s32 %r42, %r6, 31;
+and.b32 %r43, %r42, %r41;
+ld.param.u32 %r143, [_Z14calculate_tempiPfS_S_iiiiffffff_param_5];
+add.s32 %r44, %r143, -1;
+.loc 2 173 1
+setp.gt.s32 %p7, %r8, %r44;
+mov.u32 %r45, -15;
+sub.s32 %r46, %r45, %r6;
+add.s32 %r47, %r143, %r46;
+add.s32 %r48, %r47, 14;
+selp.b32 %r49, %r48, 15, %p7;
+.loc 2 174 1
+neg.s32 %r50, %r7;
+shr.s32 %r51, %r7, 31;
+and.b32 %r52, %r51, %r50;
+ld.param.u32 %r140, [_Z14calculate_tempiPfS_S_iiiiffffff_param_4];
+add.s32 %r53, %r140, -1;
+.loc 2 175 1
+setp.gt.s32 %p8, %r9, %r53;
+sub.s32 %r54, %r45, %r7;
+add.s32 %r55, %r140, %r54;
+add.s32 %r56, %r55, 14;
+selp.b32 %r57, %r56, 15, %p8;
+.loc 2 131 1
+mov.u32 %r154, %tid.y;
+add.s32 %r59, %r154, -1;
+.loc 2 178 1
+add.s32 %r60, %r154, 1;
+.loc 2 130 1
+mov.u32 %r158, %tid.x;
+add.s32 %r62, %r158, -1;
+.loc 2 180 1
+add.s32 %r63, %r158, 1;
+max.s32 %r64, %r43, %r59;
+min.s32 %r65, %r49, %r60;
+max.s32 %r66, %r52, %r62;
+min.s32 %r67, %r57, %r63;
+.loc 2 195 1
+cvt.f64.f32 %fd1, %f1;
+mul.wide.s32 %rl21, %r65, 64;
+mov.u64 %rl22, __cuda_local_var_17168_39_non_const_temp_on_cuda;
+add.s64 %rl23, %rl22, %rl21;
+mul.wide.s32 %rl24, %r158, 4;
+add.s64 %rl4, %rl23, %rl24;
+mul.wide.s32 %rl25, %r64, 64;
+add.s64 %rl26, %rl22, %rl25;
+add.s64 %rl5, %rl26, %rl24;
+.loc 2 195 1
+cvt.f64.f32 %fd2, %f3;
+mul.wide.s32 %rl27, %r67, 4;
+mul.wide.s32 %rl28, %r154, 64;
+add.s64 %rl29, %rl22, %rl28;
+add.s64 %rl6, %rl29, %rl27;
+mul.wide.s32 %rl30, %r66, 4;
+add.s64 %rl7, %rl29, %rl30;
+.loc 2 195 1
+cvt.f64.f32 %fd3, %f2;
+
+BB0_4:
+mov.u32 %r11, %r159;
+ld.param.u32 %r136, [_Z14calculate_tempiPfS_S_iiiiffffff_param_0];
+.loc 2 188 1
+setp.lt.s32 %p9, %r11, %r136;
+@%p9 bra BB0_5;
+bra.uni BB0_13;
+
+BB0_5:
+.loc 2 190 1
+add.s32 %r12, %r11, 1;
+mov.u32 %r69, 14;
+sub.s32 %r70, %r69, %r11;
+.loc 2 190 1
+setp.le.s32 %p10, %r22, %r70;
+setp.ge.s32 %p11, %r22, %r12;
+and.pred %p12, %p10, %p11;
+.loc 2 190 1
+@!%p12 bra BB0_8;
+
+setp.gt.s32 %p13, %r20, %r70;
+setp.lt.s32 %p14, %r20, %r12;
+or.pred %p15, %p14, %p13;
+ld.param.u32 %r135, [_Z14calculate_tempiPfS_S_iiiiffffff_param_0];
+shl.b32 %r74, %r135, 1;
+.loc 2 145 1
+sub.s32 %r76, %r15, %r74;
+.loc 2 151 1
+mul.lo.s32 %r78, %r13, %r76;
+ld.param.u32 %r145, [_Z14calculate_tempiPfS_S_iiiiffffff_param_6];
+.loc 2 151 1
+sub.s32 %r79, %r78, %r145;
+.loc 2 174 1
+neg.s32 %r80, %r79;
+.loc 2 151 1
+shr.s32 %r81, %r79, 31;
+and.b32 %r82, %r81, %r80;
+setp.lt.s32 %p16, %r22, %r82;
+add.s32 %r84, %r79, 15;
+ld.param.u32 %r139, [_Z14calculate_tempiPfS_S_iiiiffffff_param_4];
+add.s32 %r85, %r139, -1;
+.loc 2 175 1
+setp.gt.s32 %p17, %r84, %r85;
+sub.s32 %r87, %r45, %r79;
+add.s32 %r88, %r139, %r87;
+add.s32 %r89, %r88, 14;
+selp.b32 %r90, %r89, 15, %p17;
+setp.gt.s32 %p18, %r22, %r90;
+or.pred %p19, %p16, %p18;
+or.pred %p20, %p15, %p19;
+.loc 2 150 1
+mul.lo.s32 %r92, %r17, %r76;
+ld.param.u32 %r148, [_Z14calculate_tempiPfS_S_iiiiffffff_param_7];
+.loc 2 150 1
+sub.s32 %r93, %r92, %r148;
+.loc 2 172 1
+neg.s32 %r94, %r93;
+.loc 2 150 1
+shr.s32 %r95, %r93, 31;
+and.b32 %r96, %r95, %r94;
+setp.lt.s32 %p21, %r20, %r96;
+add.s32 %r97, %r93, 15;
+ld.param.u32 %r142, [_Z14calculate_tempiPfS_S_iiiiffffff_param_5];
+add.s32 %r98, %r142, -1;
+.loc 2 173 1
+setp.gt.s32 %p22, %r97, %r98;
+sub.s32 %r99, %r45, %r93;
+add.s32 %r100, %r142, %r99;
+add.s32 %r101, %r100, 14;
+selp.b32 %r102, %r101, 15, %p22;
+setp.gt.s32 %p23, %r20, %r102;
+or.pred %p24, %p21, %p23;
+or.pred %p25, %p20, %p24;
+.loc 2 190 1
+@%p25 bra BB0_8;
+
+mul.wide.s32 %rl31, %r20, 64;
+add.s64 %rl33, %rl22, %rl31;
+mul.wide.s32 %rl34, %r22, 4;
+add.s64 %rl35, %rl33, %rl34;
+.loc 2 195 1
+ld.shared.f32 %f12, [%rl35];
+cvt.f64.f32 %fd4, %f12;
+mov.u64 %rl36, __cuda_local_var_17169_39_non_const_power_on_cuda;
+add.s64 %rl37, %rl36, %rl31;
+add.s64 %rl38, %rl37, %rl34;
+.loc 2 195 1
+ld.shared.f32 %f13, [%rl5];
+ld.shared.f32 %f14, [%rl4];
+add.f32 %f15, %f14, %f13;
+cvt.f64.f32 %fd5, %f15;
+add.f64 %fd6, %fd4, %fd4;
+sub.f64 %fd7, %fd5, %fd6;
+ld.shared.f32 %f16, [%rl38];
+cvt.f64.f32 %fd8, %f16;
+fma.rn.f64 %fd9, %fd7, %fd2, %fd8;
+ld.shared.f32 %f17, [%rl7];
+ld.shared.f32 %f18, [%rl6];
+add.f32 %f19, %f18, %f17;
+cvt.f64.f32 %fd10, %f19;
+sub.f64 %fd11, %fd10, %fd6;
+fma.rn.f64 %fd12, %fd11, %fd3, %fd9;
+mov.f32 %f20, 0f42A00000;
+.loc 2 195 1
+sub.f32 %f21, %f20, %f12;
+mul.f32 %f22, %f21, %f4;
+cvt.f64.f32 %fd13, %f22;
+add.f64 %fd14, %fd12, %fd13;
+fma.rn.f64 %fd15, %fd1, %fd14, %fd4;
+cvt.rn.f32.f64 %f23, %fd15;
+mov.u64 %rl39, __cuda_local_var_17170_39_non_const_temp_t;
+add.s64 %rl40, %rl39, %rl31;
+add.s64 %rl41, %rl40, %rl34;
+.loc 2 195 1
+st.shared.f32 [%rl41], %f23;
+mov.u16 %rc7, 1;
+bra.uni BB0_9;
+
+BB0_8:
+mov.u16 %rc7, 0;
+
+BB0_9:
+.loc 2 201 1
+bar.sync 0;
+ld.param.u32 %r134, [_Z14calculate_tempiPfS_S_iiiiffffff_param_0];
+add.s32 %r112, %r134, -1;
+.loc 2 202 1
+setp.eq.s32 %p26, %r11, %r112;
+@%p26 bra BB0_13;
+
+.loc 2 204 1
 {
 .reg .s16 %temp1;
 .reg .s16 %temp2;
 cvt.s16.s8 %temp1, %rc7;
-mov.b16 %temp2, 71;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p2, %temp1, %temp2;
-}
-@%p2 bra BB2_9;
-
-ld.param.u8 %rc6, [_Z2rcc_param_0];
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc6;
-mov.b16 %temp2, 84;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p3, %temp1, %temp2;
-}
-@%p3 bra BB2_8;
-
-ld.param.u8 %rc5, [_Z2rcc_param_0];
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc5;
-mov.b16 %temp2, 113;
-cvt.s16.s8 %temp2, %temp2;
-setp.ne.s16 %p4, %temp1, %temp2;
-}
-@%p4 bra BB2_11;
-
-mov.u32 %r1, 0;
-.loc 2 60 1
-st.param.b32	[func_retval0+0], %r1;
-ret;
-
-BB2_8:
-mov.u32 %r2, 65;
-.loc 2 60 1
-st.param.b32	[func_retval0+0], %r2;
-ret;
-
-BB2_9:
-mov.u32 %r3, 67;
-.loc 2 60 1
-st.param.b32	[func_retval0+0], %r3;
-ret;
-
-BB2_10:
-mov.u32 %r5, 84;
-.loc 2 60 1
-st.param.b32	[func_retval0+0], %r5;
-ret;
-
-BB2_11:
-ld.param.u8 %rc2, [_Z2rcc_param_0];
-.loc 2 60 1
-cvt.s32.s8 %r6, %rc2;
-st.param.b32	[func_retval0+0], %r6;
-ret;
-}
-
-.entry _Z15mummergpuKernelP10MatchCoordPcPKiS3_ii(
-.param .u64 _Z15mummergpuKernelP10MatchCoordPcPKiS3_ii_param_0,
-.param .u64 _Z15mummergpuKernelP10MatchCoordPcPKiS3_ii_param_1,
-.param .u64 _Z15mummergpuKernelP10MatchCoordPcPKiS3_ii_param_2,
-.param .u64 _Z15mummergpuKernelP10MatchCoordPcPKiS3_ii_param_3,
-.param .u32 _Z15mummergpuKernelP10MatchCoordPcPKiS3_ii_param_4,
-.param .u32 _Z15mummergpuKernelP10MatchCoordPcPKiS3_ii_param_5
-)
-{
-.reg .f32 %f<9>;
-.reg .s16 %rs<58>;
-.reg .pred %p<21>;
-.reg .s32 %r<145>;
-.reg .s64 %rl<29>;
-.reg .s16 %rc<5>;
-
-
-ld.param.u64 %rl12, [_Z15mummergpuKernelP10MatchCoordPcPKiS3_ii_param_0];
-ld.param.u64 %rl13, [_Z15mummergpuKernelP10MatchCoordPcPKiS3_ii_param_1];
-ld.param.u64 %rl14, [_Z15mummergpuKernelP10MatchCoordPcPKiS3_ii_param_2];
-ld.param.u64 %rl15, [_Z15mummergpuKernelP10MatchCoordPcPKiS3_ii_param_3];
-ld.param.u32 %r45, [_Z15mummergpuKernelP10MatchCoordPcPKiS3_ii_param_4];
-cvta.to.global.u64 %rl1, %rl12;
-cvta.to.global.u64 %rl2, %rl13;
-cvta.to.global.u64 %rl3, %rl14;
-cvta.to.global.u64 %rl4, %rl15;
-.loc 2 75 1
-mov.u32 %r46, %ntid.x;
-mov.u32 %r47, %ctaid.x;
-.loc 3 301 5
-mul24.lo.u32 %r48, %r47, %r46;
-.loc 2 75 1
-mov.u32 %r49, %tid.x;
-add.s32 %r2, %r49, %r48;
-.loc 2 76 1
-setp.ge.s32 %p1, %r2, %r45;
-@%p1 bra BB3_33;
-
-.loc 2 79 1
-mul.wide.s32 %rl16, %r2, 4;
-add.s64 %rl17, %rl4, %rl16;
-.loc 2 88 1
-add.s64 %rl18, %rl3, %rl16;
-ld.param.u32 %r127, [_Z15mummergpuKernelP10MatchCoordPcPKiS3_ii_param_5];
-.loc 2 89 1
-add.s32 %r50, %r127, 1;
-.loc 3 301 5
-mul24.lo.u32 %r51, %r2, %r50;
-.loc 2 89 1
-cvt.u64.u32 %rl19, %r51;
-ld.global.s32 %rl20, [%rl18];
-sub.s64 %rl21, %rl20, %rl19;
-.loc 2 89 1
-shl.b64 %rl22, %rl21, 3;
-add.s64 %rl27, %rl1, %rl22;
-.loc 2 90 1
-add.s64 %rl28, %rl2, %rl20;
-.loc 2 79 1
-ld.global.u32 %r53, [%rl17];
-.loc 2 92 1
-sub.s32 %r3, %r53, %r127;
-.loc 2 94 1
-setp.lt.s32 %p2, %r3, 0;
-@%p2 bra BB3_33;
-
-mov.u16 %rs56, 0;
-mov.u32 %r129, 0;
-mov.u32 %r138, %r129;
-mov.u32 %r143, %r129;
-mov.u32 %r128, %r129;
-
-BB3_3:
-mov.u16 %rs47, %rs56;
-mov.u16 %rs54, %rs47;
-mov.u16 %rs30, %rs39;
-mov.u16 %rs37, %rs30;
-mov.u32 %r133, %r138;
-mov.u32 %r137, %r133;
-mov.u32 %r8, %r129;
-.loc 2 103 1
-setp.lt.s32 %p3, %r143, 1;
-setp.eq.s32 %p4, %r8, 0;
-or.pred %p5, %p4, %p3;
-cvt.u16.u32 %rs40, %r8;
-shr.u32 %r60, %r8, 16;
-cvt.u16.u32 %rs57, %r60;
-@%p5 bra BB3_4;
-bra.uni BB3_5;
-
-BB3_4:
-mov.u32 %r143, 1;
-mov.u32 %r137, 0;
-mov.u16 %rs57, 1;
-mov.u16 %rs40, 0;
-
-BB3_5:
-mov.u16 %rs55, %rs57;
-mov.u16 %rs38, %rs40;
-mov.u32 %r135, %r137;
-.loc 2 111 1
-cvt.s64.s32 %rl23, %r143;
-add.s64 %rl24, %rl28, %rl23;
-ld.global.u8 %rc4, [%rl24];
-mov.u32 %r144, 0;
-
-BB3_6:
-mov.u16 %rs42, %rs54;
-mov.u16 %rs10, %rs55;
-mov.u16 %rs52, %rs42;
-mov.u16 %rs25, %rs37;
-mov.u16 %rs9, %rs38;
-mov.u16 %rs35, %rs25;
-mov.u32 %r12, %r135;
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc4;
 mov.b16 %temp2, 0;
 cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p6, %temp1, %temp2;
+setp.eq.s16 %p27, %temp1, %temp2;
 }
-.loc 2 116 1
-@%p6 bra BB3_28;
+@%p27 bra BB0_12;
 
-.loc 2 121 1
-cvt.rn.f32.u16 %f1, %rs9;
-cvt.rn.f32.u16 %f2, %rs10;
-mov.u32 %r69, 0;
+mul.wide.s32 %rl42, %r20, 64;
+mov.u64 %rl43, __cuda_local_var_17170_39_non_const_temp_t;
+add.s64 %rl44, %rl43, %rl42;
+mul.wide.s32 %rl45, %r22, 4;
+add.s64 %rl46, %rl44, %rl45;
+add.s64 %rl48, %rl22, %rl42;
+add.s64 %rl49, %rl48, %rl45;
+.loc 2 205 1
+ld.shared.f32 %f24, [%rl46];
+st.shared.f32 [%rl49], %f24;
 
-	tex.2d.v4.u32.f32 {%r65, %r66, %r67, %r68}, [childrentex, {%f1, %f2}];
+BB0_12:
+.loc 2 206 1
+bar.sync 0;
+mov.u32 %r159, %r12;
+bra.uni BB0_4;
 
-	{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc4;
-mov.b16 %temp2, 65;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p7, %temp1, %temp2;
-}
-.loc 2 121 1
-mov.u32 %r18, %r68;
-mov.u32 %r17, %r67;
-mov.u32 %r16, %r66;
-mov.u32 %r15, %r65;
-.loc 2 124 1
-@%p7 bra BB3_15;
-
+BB0_13:
+.loc 2 212 1
 {
 .reg .s16 %temp1;
 .reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc4;
-mov.b16 %temp2, 67;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p8, %temp1, %temp2;
-}
-.loc 2 124 1
-@%p8 bra BB3_14;
-
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc4;
-mov.b16 %temp2, 71;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p9, %temp1, %temp2;
-}
-.loc 2 124 1
-@%p9 bra BB3_13;
-
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc4;
-mov.b16 %temp2, 84;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p10, %temp1, %temp2;
-}
-.loc 2 124 1
-@%p10 bra BB3_12;
-
-mov.u32 %r140, %r69;
-bra.uni BB3_16;
-
-BB3_12:
-mov.u32 %r140, %r18;
-bra.uni BB3_16;
-
-BB3_13:
-mov.u32 %r140, %r17;
-bra.uni BB3_16;
-
-BB3_14:
-mov.u32 %r140, %r16;
-bra.uni BB3_16;
-
-BB3_15:
-mov.u32 %r140, %r15;
-
-BB3_16:
-.loc 2 136 1
-setp.eq.s32 %p11, %r140, 0;
-@%p11 bra BB3_25;
-
-.loc 2 149 1
-cvt.u16.u32 %rs38, %r140;
-.loc 2 150 1
-shr.u32 %r75, %r140, 16;
-cvt.u16.u32 %rs55, %r75;
-.loc 2 151 1
-cvt.rn.f32.u16 %f3, %rs38;
-cvt.rn.f32.u16 %f4, %rs55;
-mov.u32 %r76, 0;
-
-	tex.2d.v4.u32.f32 {%r71, %r72, %r73, %r74}, [nodetex, {%f3, %f4}];
-
-	.loc 2 156 1
-setp.eq.s32 %p12, %r12, 0;
-.loc 2 151 1
-mov.u32 %r142, %r71;
-.loc 2 156 1
-@%p12 bra BB3_19;
-
-.loc 2 158 1
-sub.s32 %r77, %r72, %r71;
-add.s32 %r78, %r77, 1;
-.loc 2 159 1
-setp.lt.s32 %p13, %r12, %r78;
-.loc 2 165 1
-sub.s32 %r79, %r12, %r78;
-selp.b32 %r22, 0, %r79, %p13;
-min.s32 %r141, %r12, %r78;
-.loc 2 173 1
-add.s32 %r80, %r71, %r12;
-.loc 2 163 1
-add.s32 %r81, %r72, 1;
-selp.b32 %r144, %r80, %r81, %p13;
-mov.u32 %r136, %r22;
-bra.uni BB3_20;
-
-BB3_19:
-.loc 2 181 1
-add.s32 %r144, %r71, 1;
-mov.u32 %r141, 1;
-mov.u32 %r136, %r12;
-
-BB3_20:
-mov.u32 %r135, %r136;
-add.s32 %r143, %r141, %r143;
-
-BB3_21:
-cvt.s64.s32 %rl25, %r143;
-add.s64 %rl26, %rl28, %rl25;
-ld.global.u8 %rc4, [%rl26];
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc4;
+cvt.s16.s8 %temp1, %rc7;
 mov.b16 %temp2, 0;
-cvt.s16.s8 %temp2, %temp2;
-setp.ne.s16 %p14, %temp1, %temp2;
-}
-setp.le.s32 %p15, %r144, %r72;
-and.pred %p16, %p14, %p15;
-mov.u16 %rs37, %rs9;
-mov.u16 %rs54, %rs10;
-.loc 2 186 1
-@!%p16 bra BB3_6;
-
-shr.s32 %r88, %r144, 16;
-and.b32 %r89, %r88, -4;
-.loc 2 45 1
-and.b32 %r90, %r144, 3;
-or.b32 %r91, %r89, %r90;
-shr.u32 %r92, %r144, 2;
-and.b32 %r93, %r92, 65535;
-.loc 2 47 1
-cvt.rn.f32.s32 %f5, %r93;
-cvt.rn.f32.s32 %f6, %r91;
-
-	tex.2d.v4.s32.f32 {%r84, %r85, %r86, %r87}, [reftex, {%f5, %f6}];
-
-	.loc 2 192 1
-cvt.s32.s8 %r95, %rc4;
-shl.b32 %r96, %r84, 24;
-shr.s32 %r97, %r96, 24;
-.loc 2 192 1
-setp.eq.s32 %p17, %r97, %r95;
-@%p17 bra BB3_24;
-
-mov.u16 %rs35, %rs9;
-mov.u16 %rs34, %rs38;
-mov.u16 %rs52, %rs10;
-mov.u16 %rs51, %rs55;
-bra.uni BB3_29;
-
-BB3_24:
-.loc 2 199 1
-add.s32 %r143, %r143, 1;
-.loc 2 200 1
-add.s32 %r144, %r144, 1;
-bra.uni BB3_21;
-
-BB3_25:
-ld.param.u32 %r126, [_Z15mummergpuKernelP10MatchCoordPcPKiS3_ii_param_5];
-.loc 2 28 1
-setp.le.s32 %p18, %r143, %r126;
-@%p18 bra BB3_27;
-
-.loc 2 30 1
-cvt.u32.u16 %r98, %rs10;
-and.b32 %r99, %r98, 31;
-.loc 2 32 1
-cvt.u32.u16 %r100, %rs9;
-shl.b32 %r101, %r100, 5;
-shl.b32 %r102, %r98, 12;
-and.b32 %r103, %r102, 268304384;
-.loc 2 32 1
-or.b32 %r104, %r99, %r101;
-.loc 2 33 1
-add.s32 %r105, %r104, %r103;
-.loc 2 36 1
-st.global.u32 [%rl27], %r105;
-mov.u16 %rs23, 0;
-.loc 2 37 1
-st.global.u16 [%rl27+4], %rs23;
-
-BB3_27:
-add.s32 %r143, %r143, -1;
-mov.u32 %r139, 0;
-mov.u16 %rs36, %rs9;
-mov.u16 %rs53, %rs10;
-bra.uni BB3_32;
-
-BB3_28:
-mov.u16 %rs34, %rs9;
-mov.u16 %rs51, %rs10;
-
-BB3_29:
-mov.u16 %rs53, %rs52;
-mov.u16 %rs36, %rs35;
-.loc 2 209 1
-sub.s32 %r139, %r144, %r142;
-ld.param.u32 %r125, [_Z15mummergpuKernelP10MatchCoordPcPKiS3_ii_param_5];
-.loc 2 28 1
-setp.le.s32 %p19, %r143, %r125;
-@%p19 bra BB3_31;
-
-.loc 2 30 1
-cvt.u32.u16 %r109, %rs51;
-and.b32 %r110, %r109, 31;
-.loc 2 32 1
-cvt.u32.u16 %r111, %rs34;
-shl.b32 %r112, %r111, 5;
-shl.b32 %r113, %r109, 12;
-and.b32 %r114, %r113, 268304384;
-.loc 2 32 1
-or.b32 %r115, %r110, %r112;
-.loc 2 33 1
-add.s32 %r116, %r115, %r114;
-.loc 2 36 1
-st.global.u32 [%rl27], %r116;
-.loc 2 37 1
-st.global.u16 [%rl27+4], %r139;
-
-BB3_31:
-.loc 2 213 1
-add.s32 %r119, %r143, -1;
-sub.s32 %r143, %r119, %r139;
-
-BB3_32:
-mov.u16 %rs18, %rs53;
-mov.u16 %rs17, %rs36;
-mov.u32 %r40, %r139;
-.loc 2 217 1
-cvt.rn.f32.u16 %f8, %rs18;
-cvt.rn.f32.u16 %f7, %rs17;
-mov.u32 %r124, 0;
-
-	tex.2d.v4.u32.f32 {%r120, %r121, %r122, %r123}, [nodetex, {%f7, %f8}];
-
-	.loc 2 94 63
-add.s64 %rl27, %rl27, 8;
-add.s64 %rl28, %rl28, 1;
-add.s32 %r128, %r128, 1;
-.loc 2 94 1
-setp.le.s32 %p20, %r128, %r3;
-.loc 2 217 1
-mov.u32 %r43, %r123;
-mov.u32 %r142, %r120;
-mov.u32 %r129, %r43;
-mov.u32 %r138, %r40;
-mov.u16 %rs39, %rs17;
-mov.u16 %rs56, %rs18;
-.loc 2 94 1
-@%p20 bra BB3_3;
-
-BB3_33:
-.loc 2 226 1
-ret;
-}
-
-.entry _Z17mummergpuRCKernelP10MatchCoordPcPKiS3_ii(
-.param .u64 _Z17mummergpuRCKernelP10MatchCoordPcPKiS3_ii_param_0,
-.param .u64 _Z17mummergpuRCKernelP10MatchCoordPcPKiS3_ii_param_1,
-.param .u64 _Z17mummergpuRCKernelP10MatchCoordPcPKiS3_ii_param_2,
-.param .u64 _Z17mummergpuRCKernelP10MatchCoordPcPKiS3_ii_param_3,
-.param .u32 _Z17mummergpuRCKernelP10MatchCoordPcPKiS3_ii_param_4,
-.param .u32 _Z17mummergpuRCKernelP10MatchCoordPcPKiS3_ii_param_5
-)
-{
-.reg .f32 %f<9>;
-.reg .s16 %rs<78>;
-.reg .pred %p<36>;
-.reg .s32 %r<161>;
-.reg .s64 %rl<35>;
-.reg .s16 %rc<24>;
-
-
-ld.param.u64 %rl9, [_Z17mummergpuRCKernelP10MatchCoordPcPKiS3_ii_param_0];
-ld.param.u64 %rl10, [_Z17mummergpuRCKernelP10MatchCoordPcPKiS3_ii_param_2];
-ld.param.u64 %rl11, [_Z17mummergpuRCKernelP10MatchCoordPcPKiS3_ii_param_3];
-ld.param.u32 %r45, [_Z17mummergpuRCKernelP10MatchCoordPcPKiS3_ii_param_4];
-cvta.to.global.u64 %rl2, %rl9;
-cvta.to.global.u64 %rl3, %rl10;
-cvta.to.global.u64 %rl4, %rl11;
-.loc 2 244 1
-mov.u32 %r46, %ntid.x;
-mov.u32 %r47, %ctaid.x;
-.loc 3 301 5
-mul24.lo.u32 %r48, %r47, %r46;
-.loc 2 244 1
-mov.u32 %r49, %tid.x;
-add.s32 %r2, %r49, %r48;
-.loc 2 245 1
-setp.ge.s32 %p1, %r2, %r45;
-@%p1 bra BB4_57;
-
-.loc 2 246 1
-mul.wide.s32 %rl12, %r2, 4;
-add.s64 %rl13, %rl4, %rl12;
-.loc 2 259 1
-add.s64 %rl14, %rl3, %rl12;
-ld.param.u32 %r138, [_Z17mummergpuRCKernelP10MatchCoordPcPKiS3_ii_param_5];
-.loc 2 260 1
-add.s32 %r50, %r138, 1;
-.loc 3 301 5
-mul24.lo.u32 %r51, %r2, %r50;
-.loc 2 260 1
-cvt.u64.u32 %rl15, %r51;
-ld.global.s32 %rl16, [%rl14];
-sub.s64 %rl17, %rl16, %rl15;
-.loc 2 260 1
-shl.b64 %rl18, %rl17, 3;
-add.s64 %rl34, %rl2, %rl18;
-add.s64 %rl6, %rl16, 1;
-.loc 2 246 1
-ld.global.u32 %r139, [%rl13];
-.loc 2 263 1
-setp.lt.s32 %p2, %r139, %r138;
-@%p2 bra BB4_57;
-
-mov.u16 %rs76, 0;
-mov.u32 %r140, %r58;
-mov.u32 %r158, %r59;
-mov.u32 %r154, 0;
-mov.u32 %r159, %r154;
-
-BB4_3:
-mov.u16 %rs57, %rs76;
-mov.u16 %rs74, %rs57;
-mov.u16 %rs30, %rs49;
-mov.u16 %rs47, %rs30;
-mov.u32 %r149, %r154;
-mov.u32 %r153, %r149;
-mov.u32 %r8, %r140;
-.loc 2 278 1
-setp.lt.s32 %p3, %r159, 1;
-setp.eq.s32 %p4, %r8, 0;
-or.pred %p5, %p4, %p3;
-cvt.u16.u32 %rs50, %r8;
-shr.u32 %r60, %r8, 16;
-cvt.u16.u32 %rs77, %r60;
-@%p5 bra BB4_4;
-bra.uni BB4_5;
-
-BB4_4:
-mov.u32 %r159, 1;
-mov.u32 %r153, 0;
-mov.u16 %rs77, 1;
-mov.u16 %rs50, 0;
-
-BB4_5:
-mov.u16 %rs75, %rs77;
-mov.u16 %rs48, %rs50;
-mov.u32 %r151, %r153;
-ld.param.u64 %rl33, [_Z17mummergpuRCKernelP10MatchCoordPcPKiS3_ii_param_1];
-cvta.to.global.u64 %rl19, %rl33;
-.loc 2 286 1
-sub.s32 %r63, %r139, %r159;
-cvt.s64.s32 %rl20, %r63;
-add.s64 %rl21, %rl20, %rl6;
-.loc 2 286 1
-add.s64 %rl22, %rl19, %rl21;
-ld.global.u8 %rc22, [%rl22];
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc22;
-mov.b16 %temp2, 65;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p6, %temp1, %temp2;
-}
-.loc 2 52 1
-@%p6 bra BB4_15;
-
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc22;
-mov.b16 %temp2, 67;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p7, %temp1, %temp2;
-}
-.loc 2 52 1
-@%p7 bra BB4_14;
-
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc22;
-mov.b16 %temp2, 71;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p8, %temp1, %temp2;
-}
-.loc 2 52 1
-@%p8 bra BB4_13;
-
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc22;
-mov.b16 %temp2, 84;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p9, %temp1, %temp2;
-}
-.loc 2 52 1
-@%p9 bra BB4_12;
-
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc22;
-mov.b16 %temp2, 113;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p10, %temp1, %temp2;
-}
-.loc 2 52 1
-@%p10 bra BB4_11;
-
-mov.u32 %r160, 0;
-bra.uni BB4_16;
-
-BB4_11:
-mov.u32 %r160, 0;
-mov.u16 %rc22, 0;
-bra.uni BB4_16;
-
-BB4_12:
-mov.u32 %r160, 0;
-mov.u16 %rc22, 65;
-bra.uni BB4_16;
-
-BB4_13:
-mov.u32 %r160, 0;
-mov.u16 %rc22, 67;
-bra.uni BB4_16;
-
-BB4_14:
-mov.u32 %r160, 0;
-mov.u16 %rc22, 71;
-bra.uni BB4_16;
-
-BB4_15:
-mov.u32 %r160, 0;
-mov.u16 %rc22, 84;
-
-BB4_16:
-mov.u16 %rs52, %rs74;
-mov.u16 %rs10, %rs75;
-mov.u16 %rs72, %rs52;
-mov.u16 %rs25, %rs47;
-mov.u16 %rs9, %rs48;
-mov.u16 %rs45, %rs25;
-mov.u32 %r12, %r151;
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc22;
-mov.b16 %temp2, 0;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p11, %temp1, %temp2;
-}
-.loc 2 291 1
-@%p11 bra BB4_52;
-
-.loc 2 296 1
-cvt.rn.f32.u16 %f1, %rs9;
-cvt.rn.f32.u16 %f2, %rs10;
-mov.u32 %r75, 0;
-
-	tex.2d.v4.u32.f32 {%r71, %r72, %r73, %r74}, [childrentex, {%f1, %f2}];
-
-	{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc22;
-mov.b16 %temp2, 65;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p12, %temp1, %temp2;
-}
-.loc 2 296 1
-mov.u32 %r18, %r74;
-mov.u32 %r17, %r73;
-mov.u32 %r16, %r72;
-mov.u32 %r15, %r71;
-.loc 2 299 1
-@%p12 bra BB4_25;
-
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc22;
-mov.b16 %temp2, 67;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p13, %temp1, %temp2;
-}
-.loc 2 299 1
-@%p13 bra BB4_24;
-
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc22;
-mov.b16 %temp2, 71;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p14, %temp1, %temp2;
-}
-.loc 2 299 1
-@%p14 bra BB4_23;
-
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc22;
-mov.b16 %temp2, 84;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p15, %temp1, %temp2;
-}
-.loc 2 299 1
-@%p15 bra BB4_22;
-
-mov.u32 %r156, %r75;
-bra.uni BB4_26;
-
-BB4_22:
-mov.u32 %r156, %r18;
-bra.uni BB4_26;
-
-BB4_23:
-mov.u32 %r156, %r17;
-bra.uni BB4_26;
-
-BB4_24:
-mov.u32 %r156, %r16;
-bra.uni BB4_26;
-
-BB4_25:
-mov.u32 %r156, %r15;
-
-BB4_26:
-.loc 2 311 1
-setp.eq.s32 %p16, %r156, 0;
-@%p16 bra BB4_49;
-
-.loc 2 324 1
-cvt.u16.u32 %rs48, %r156;
-.loc 2 325 1
-shr.u32 %r81, %r156, 16;
-cvt.u16.u32 %rs75, %r81;
-.loc 2 326 1
-cvt.rn.f32.u16 %f3, %rs48;
-cvt.rn.f32.u16 %f4, %rs75;
-mov.u32 %r82, 0;
-
-	tex.2d.v4.u32.f32 {%r77, %r78, %r79, %r80}, [nodetex, {%f3, %f4}];
-
-	.loc 2 331 1
-setp.eq.s32 %p17, %r12, 0;
-.loc 2 326 1
-mov.u32 %r158, %r77;
-.loc 2 331 1
-@%p17 bra BB4_29;
-
-.loc 2 333 1
-sub.s32 %r83, %r78, %r77;
-add.s32 %r84, %r83, 1;
-.loc 2 334 1
-setp.lt.s32 %p18, %r12, %r84;
-.loc 2 340 1
-sub.s32 %r85, %r12, %r84;
-selp.b32 %r22, 0, %r85, %p18;
-min.s32 %r157, %r12, %r84;
-.loc 2 348 1
-add.s32 %r86, %r77, %r12;
-.loc 2 338 1
-add.s32 %r87, %r78, 1;
-selp.b32 %r160, %r86, %r87, %p18;
-mov.u32 %r152, %r22;
-bra.uni BB4_30;
-
-BB4_29:
-.loc 2 356 1
-add.s32 %r160, %r77, 1;
-mov.u32 %r157, 1;
-mov.u32 %r152, %r12;
-
-BB4_30:
-mov.u32 %r151, %r152;
-ld.param.u64 %rl32, [_Z17mummergpuRCKernelP10MatchCoordPcPKiS3_ii_param_1];
-cvta.to.global.u64 %rl23, %rl32;
-add.s32 %r159, %r157, %r159;
-.loc 2 359 1
-sub.s32 %r89, %r139, %r159;
-cvt.s64.s32 %rl24, %r89;
-add.s64 %rl25, %rl24, %rl6;
-.loc 2 359 1
-add.s64 %rl26, %rl23, %rl25;
-ld.global.u8 %rc23, [%rl26];
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc23;
-mov.b16 %temp2, 65;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p19, %temp1, %temp2;
-}
-.loc 2 52 1
-@%p19 bra BB4_39;
-
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc23;
-mov.b16 %temp2, 67;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p20, %temp1, %temp2;
-}
-.loc 2 52 1
-@%p20 bra BB4_38;
-
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc23;
-mov.b16 %temp2, 71;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p21, %temp1, %temp2;
-}
-.loc 2 52 1
-@%p21 bra BB4_37;
-
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc23;
-mov.b16 %temp2, 84;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p22, %temp1, %temp2;
-}
-.loc 2 52 1
-@%p22 bra BB4_36;
-
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc23;
-mov.b16 %temp2, 113;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p23, %temp1, %temp2;
-}
-@%p23 bra BB4_35;
-bra.uni BB4_40;
-
-BB4_35:
-mov.u16 %rc23, 0;
-bra.uni BB4_40;
-
-BB4_36:
-mov.u16 %rc23, 65;
-bra.uni BB4_40;
-
-BB4_37:
-mov.u16 %rc23, 67;
-bra.uni BB4_40;
-
-BB4_38:
-mov.u16 %rc23, 71;
-bra.uni BB4_40;
-
-BB4_39:
-mov.u16 %rc23, 84;
-
-BB4_40:
-mov.u16 %rc21, %rc23;
-mov.u16 %rc22, %rc21;
-setp.le.s32 %p24, %r160, %r78;
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc22;
-mov.b16 %temp2, 0;
-cvt.s16.s8 %temp2, %temp2;
-setp.ne.s16 %p25, %temp1, %temp2;
-}
-and.pred %p26, %p25, %p24;
-mov.u16 %rs47, %rs9;
-mov.u16 %rs74, %rs10;
-.loc 2 361 1
-@!%p26 bra BB4_16;
-
-shr.s32 %r95, %r160, 16;
-and.b32 %r96, %r95, -4;
-.loc 2 45 1
-and.b32 %r97, %r160, 3;
-or.b32 %r98, %r96, %r97;
-shr.u32 %r99, %r160, 2;
-and.b32 %r100, %r99, 65535;
-.loc 2 47 1
-cvt.rn.f32.s32 %f5, %r100;
-cvt.rn.f32.s32 %f6, %r98;
-
-	tex.2d.v4.s32.f32 {%r91, %r92, %r93, %r94}, [reftex, {%f5, %f6}];
-
-	.loc 2 367 1
-cvt.s32.s8 %r102, %rc22;
-shl.b32 %r103, %r91, 24;
-shr.s32 %r104, %r103, 24;
-.loc 2 367 1
-setp.eq.s32 %p27, %r104, %r102;
-@%p27 bra BB4_43;
-
-mov.u16 %rs45, %rs9;
-mov.u16 %rs44, %rs48;
-mov.u16 %rs72, %rs10;
-mov.u16 %rs71, %rs75;
-bra.uni BB4_53;
-
-BB4_43:
-ld.param.u64 %rl31, [_Z17mummergpuRCKernelP10MatchCoordPcPKiS3_ii_param_1];
-cvta.to.global.u64 %rl27, %rl31;
-.loc 2 375 1
-add.s32 %r160, %r160, 1;
-.loc 2 374 1
-add.s32 %r159, %r159, 1;
-.loc 2 376 1
-sub.s32 %r105, %r139, %r159;
-cvt.s64.s32 %rl28, %r105;
-add.s64 %rl29, %rl28, %rl6;
-.loc 2 376 1
-add.s64 %rl30, %rl27, %rl29;
-ld.global.u8 %rc5, [%rl30];
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc5;
-mov.b16 %temp2, 65;
 cvt.s16.s8 %temp2, %temp2;
 setp.eq.s16 %p28, %temp1, %temp2;
 }
-mov.u16 %rc16, 84;
-mov.u16 %rc23, %rc16;
-.loc 2 52 1
-@%p28 bra BB4_40;
+@%p28 bra BB0_15;
 
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc5;
-mov.b16 %temp2, 67;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p29, %temp1, %temp2;
-}
-mov.u16 %rc17, 71;
-mov.u16 %rc23, %rc17;
-.loc 2 52 1
-@%p29 bra BB4_40;
+.loc 2 131 1
+mov.u32 %r153, %tid.y;
+mul.wide.s32 %rl50, %r153, 64;
+mov.u64 %rl51, __cuda_local_var_17170_39_non_const_temp_t;
+add.s64 %rl52, %rl51, %rl50;
+.loc 2 130 1
+mov.u32 %r157, %tid.x;
+mul.wide.s32 %rl53, %r157, 4;
+add.s64 %rl54, %rl52, %rl53;
+ld.param.u32 %r133, [_Z14calculate_tempiPfS_S_iiiiffffff_param_0];
+shl.b32 %r119, %r133, 1;
+.loc 2 145 1
+sub.s32 %r121, %r15, %r119;
+.loc 2 128 1
+mov.u32 %r151, %ctaid.y;
+.loc 2 150 1
+mul.lo.s32 %r123, %r151, %r121;
+ld.param.u32 %r147, [_Z14calculate_tempiPfS_S_iiiiffffff_param_7];
+.loc 2 150 1
+sub.s32 %r124, %r123, %r147;
+.loc 2 156 1
+add.s32 %r125, %r124, %r153;
+.loc 2 127 1
+mov.u32 %r150, %ctaid.x;
+.loc 2 151 1
+mul.lo.s32 %r127, %r150, %r121;
+ld.param.u32 %r144, [_Z14calculate_tempiPfS_S_iiiiffffff_param_6];
+.loc 2 151 1
+sub.s32 %r128, %r127, %r144;
+.loc 2 157 1
+add.s32 %r129, %r128, %r157;
+ld.param.u32 %r138, [_Z14calculate_tempiPfS_S_iiiiffffff_param_4];
+.loc 2 161 1
+mad.lo.s32 %r130, %r125, %r138, %r129;
+ld.param.u64 %rl60, [_Z14calculate_tempiPfS_S_iiiiffffff_param_3];
+cvta.to.global.u64 %rl55, %rl60;
+.loc 2 213 1
+mul.wide.s32 %rl56, %r130, 4;
+add.s64 %rl57, %rl55, %rl56;
+ld.shared.f32 %f25, [%rl54];
+st.global.f32 [%rl57], %f25;
 
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc5;
-mov.b16 %temp2, 71;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p30, %temp1, %temp2;
-}
-mov.u16 %rc18, 67;
-mov.u16 %rc23, %rc18;
-.loc 2 52 1
-@%p30 bra BB4_40;
-
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc5;
-mov.b16 %temp2, 84;
-cvt.s16.s8 %temp2, %temp2;
-setp.eq.s16 %p31, %temp1, %temp2;
-}
-mov.u16 %rc19, 65;
-mov.u16 %rc23, %rc19;
-.loc 2 52 1
-@%p31 bra BB4_40;
-
-{
-.reg .s16 %temp1;
-.reg .s16 %temp2;
-cvt.s16.s8 %temp1, %rc5;
-mov.b16 %temp2, 113;
-cvt.s16.s8 %temp2, %temp2;
-setp.ne.s16 %p32, %temp1, %temp2;
-}
-mov.u16 %rc23, %rc5;
-.loc 2 52 1
-@%p32 bra BB4_40;
-
-mov.u16 %rc20, 0;
-mov.u16 %rc23, %rc20;
-bra.uni BB4_40;
-
-BB4_49:
-ld.param.u32 %r137, [_Z17mummergpuRCKernelP10MatchCoordPcPKiS3_ii_param_5];
-.loc 2 28 1
-setp.le.s32 %p33, %r159, %r137;
-@%p33 bra BB4_51;
-
-.loc 2 30 1
-cvt.u32.u16 %r107, %rs10;
-and.b32 %r108, %r107, 31;
-.loc 2 32 1
-cvt.u32.u16 %r109, %rs9;
-shl.b32 %r110, %r109, 5;
-shl.b32 %r111, %r107, 12;
-and.b32 %r112, %r111, 268304384;
-.loc 2 32 1
-or.b32 %r113, %r108, %r110;
-.loc 2 33 1
-add.s32 %r114, %r113, %r112;
-.loc 2 36 1
-st.global.u32 [%rl34], %r114;
-mov.u16 %rs23, -32768;
-.loc 2 37 1
-st.global.u16 [%rl34+4], %rs23;
-
-BB4_51:
-add.s32 %r159, %r159, -1;
-mov.u32 %r155, 0;
-mov.u16 %rs46, %rs9;
-mov.u16 %rs73, %rs10;
-bra.uni BB4_56;
-
-BB4_52:
-mov.u16 %rs44, %rs9;
-mov.u16 %rs71, %rs10;
-
-BB4_53:
-mov.u16 %rs73, %rs72;
-mov.u16 %rs46, %rs45;
-.loc 2 384 1
-sub.s32 %r155, %r160, %r158;
-ld.param.u32 %r136, [_Z17mummergpuRCKernelP10MatchCoordPcPKiS3_ii_param_5];
-.loc 2 28 1
-setp.le.s32 %p34, %r159, %r136;
-@%p34 bra BB4_55;
-
-.loc 2 30 1
-cvt.u32.u16 %r118, %rs71;
-and.b32 %r119, %r118, 31;
-.loc 2 32 1
-cvt.u32.u16 %r120, %rs44;
-shl.b32 %r121, %r120, 5;
-shl.b32 %r122, %r118, 12;
-and.b32 %r123, %r122, 268304384;
-.loc 2 32 1
-or.b32 %r124, %r119, %r121;
-.loc 2 33 1
-add.s32 %r125, %r124, %r123;
-.loc 2 36 1
-st.global.u32 [%rl34], %r125;
-.loc 2 35 1
-or.b32 %r127, %r155, 32768;
-.loc 2 37 1
-st.global.u16 [%rl34+4], %r127;
-
-BB4_55:
-.loc 2 388 1
-add.s32 %r129, %r159, -1;
-sub.s32 %r159, %r129, %r155;
-
-BB4_56:
-mov.u16 %rs18, %rs73;
-mov.u16 %rs17, %rs46;
-mov.u32 %r40, %r155;
-.loc 2 392 1
-cvt.rn.f32.u16 %f8, %rs18;
-cvt.rn.f32.u16 %f7, %rs17;
-mov.u32 %r134, 0;
-
-	tex.2d.v4.u32.f32 {%r130, %r131, %r132, %r133}, [nodetex, {%f7, %f8}];
-
-	.loc 2 263 37
-add.s64 %rl34, %rl34, 8;
-add.s32 %r139, %r139, -1;
-ld.param.u32 %r135, [_Z17mummergpuRCKernelP10MatchCoordPcPKiS3_ii_param_5];
-.loc 2 263 1
-setp.ge.s32 %p35, %r139, %r135;
-.loc 2 392 1
-mov.u32 %r43, %r133;
-mov.u32 %r158, %r130;
-mov.u32 %r140, %r43;
-mov.u32 %r154, %r40;
-mov.u16 %rs49, %rs17;
-mov.u16 %rs76, %rs18;
-.loc 2 263 1
-@%p35 bra BB4_3;
-
-BB4_57:
-.loc 2 401 1
+BB0_15:
+.loc 2 215 2
 ret;
 }
 

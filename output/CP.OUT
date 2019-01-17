@@ -1,4 +1,0 @@
-CUDA accelerated coulombic potential microbenchmark
-Original version by John E. Stone <johns@ks.uiuc.edu>
-This version maintained by Chris Rodrigues
-CUDA error: no CUDA-capable device is detected, line 167
