@@ -60,6 +60,35 @@ enum cache_event {
 
 const char * cache_request_status_str(enum cache_request_status status); 
 
+//steffygm - tag_block_t struct
+struct tag_block_t {
+    tag_block_t()
+    {
+        m_RC=0;
+	m_pos=0;
+	m_tag=0;
+        m_status=INVALID;
+    }
+    void allocate( new_addr_type tag)
+    {
+        m_RC=0;
+	m_pos=0;
+	m_tag=tag;
+        m_status=RESERVED;
+    }
+    void fill()
+    {
+        assert( m_status == RESERVED );
+        m_status=VALID;
+    }
+
+    new_addr_type    m_tag;
+    new_addr_type    m_pos; //NOTE may not be new_addr_type
+    unsigned         m_RC;
+    cache_block_state    m_status;
+};
+
+//steffygm - cache_block_t struct
 struct cache_block_t {
     cache_block_t()
     {
@@ -334,6 +363,62 @@ private:
 	linear_to_raw_address_translation *m_address_mapping;
 };
 
+// steffygm - tag_store class
+class tag_store {
+public:
+    // Use this constructor
+    tag_store(cache_config &config, int core_id, int type_id );
+    ~tag_store();
+
+    enum cache_request_status probe( new_addr_type addr, unsigned &idx ) const;
+    //enum cache_request_status access( new_addr_type addr, unsigned time, unsigned &idx );
+    //enum cache_request_status access( new_addr_type addr, unsigned time, unsigned &idx, bool &wb, cache_block_t &evicted );
+
+    //void fill( new_addr_type addr, unsigned time );
+    //void fill( unsigned idx, unsigned time );
+
+    unsigned size() const { return m_config.get_num_lines();}
+    //cache_block_t &get_block(unsigned idx) { return m_lines[idx];}
+
+    void flush(); // flash invalidate all entries
+    void new_window();
+
+    void print( FILE *stream, unsigned &total_access, unsigned &total_misses ) const;
+    float windowed_miss_rate( ) const;
+    void get_stats(unsigned &total_access, unsigned &total_misses, unsigned &total_hit_res, unsigned &total_res_fail) const;
+
+    void update_cache_parameters(cache_config &config);
+protected:
+    // This constructor is intended for use only from derived classes that wish to
+    // avoid unnecessary memory allocation that takes place in the
+    // other tag_array constructor
+    tag_store( cache_config &config,
+               int core_id,
+               int type_id,
+               tag_block_t* new_lines );
+    void init( int core_id, int type_id );
+
+protected:
+
+    cache_config &m_config;
+
+    tag_block_t *m_lines; /* nbanks x nset x assoc lines in total */ // contains RC, Pos., status, Tag
+
+    unsigned m_access;
+    unsigned m_miss;
+    unsigned m_pending_hit; // number of cache miss that hit a line that is allocated but not filled
+    unsigned m_res_fail;
+
+    // performance counters for calculating the amount of misses within a time window
+    unsigned m_prev_snapshot_access;
+    unsigned m_prev_snapshot_miss;
+    unsigned m_prev_snapshot_pending_hit;
+
+    int m_core_id; // which shader core is using this
+    int m_type_id; // what kind of cache is this (normal, texture, constant)
+};
+
+// steffygm - tag_array class
 class tag_array {
 public:
     // Use this constructor
@@ -923,6 +1008,7 @@ protected:
 /// It is write-evict (global) or write-back (local) at
 /// the granularity of individual blocks
 /// (the policy used in fermi according to the CUDA manual)
+// steffygm - l1_cache with added m_tag_store member variable
 class l1_cache : public data_cache {
 public:
     l1_cache(const char *name, cache_config &config,
@@ -937,6 +1023,17 @@ public:
                 mem_fetch *mf,
                 unsigned time,
                 std::list<cache_event> &events );
+    
+    //  The access fucntion calls this function
+    //  overwrites datacache
+    enum cache_request_status
+        process_tag_probe( bool wr,
+                           enum cache_request_status status,
+                           new_addr_type addr,
+                           unsigned cache_index,
+                           mem_fetch* mf,
+                           unsigned time,
+                           std::list<cache_event>& events );
 
 protected:
     l1_cache( const char *name,
@@ -951,6 +1048,7 @@ protected:
                   config,
                   core_id,type_id,memport,mfcreator,status, new_tag_array, L1_WR_ALLOC_R, L1_WRBK_ACC ){}
 
+    tag_store* m_tag_store;
 };
 
 /// Models second level shared cache with global write-back

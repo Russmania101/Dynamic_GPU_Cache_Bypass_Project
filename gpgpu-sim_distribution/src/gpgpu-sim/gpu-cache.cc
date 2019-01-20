@@ -110,7 +110,126 @@ unsigned l2_cache_config::set_index(new_addr_type addr) const{
 		return(part_addr >> m_line_sz_log2) & (m_nset -1);
 	}
 }
+// steffygm - BEGIN tag_store implementation
+tag_store::~tag_store() 
+{
+    delete[] m_lines;
+}
 
+tag_store::tag_store( cache_config &config,
+                      int core_id,
+                      int type_id,
+                      tag_block_t* new_lines)
+    : m_config( config ),
+      m_lines( new_lines )
+{
+    init( core_id, type_id );
+}
+
+void tag_store::update_cache_parameters(cache_config &config)
+{
+	m_config=config;
+}
+
+tag_store::tag_store( cache_config &config,
+                      int core_id,
+                      int type_id )
+    : m_config( config )
+{
+    //assert( m_config.m_write_policy == READ_ONLY ); Old assert
+    //TODO - hard code 2x l1d
+    m_lines = new tag_block_t[2*MAX_DEFAULT_CACHE_SIZE_MULTIBLIER*config.get_num_lines()];
+    init( core_id, type_id );
+}
+
+void tag_store::init( int core_id, int type_id )
+{
+    m_access = 0;
+    m_miss = 0;
+    m_pending_hit = 0;
+    m_res_fail = 0;
+    // initialize snapshot counters for visualizer
+    m_prev_snapshot_access = 0;
+    m_prev_snapshot_miss = 0;
+    m_prev_snapshot_pending_hit = 0;
+    m_core_id = core_id; 
+    m_type_id = type_id;
+}
+
+// steffygm - tag_store->probe
+enum cache_request_status tag_store::probe( new_addr_type addr, unsigned &idx ) const {
+    //assert( m_config.m_write_policy == READ_ONLY );
+    unsigned set_index = m_config.set_index(addr);
+    new_addr_type tag = m_config.tag(addr);
+
+    unsigned invalid_line = (unsigned)-1;
+    unsigned valid_line = (unsigned)-1;
+    unsigned min_RC = (unsigned)-1;
+
+    bool all_reserved = true;
+
+    // check for hit or pending hit
+    // TODO - hardcode 2* way of l1d
+    for (unsigned way=0; way<2*m_config.m_assoc; way++) {
+        unsigned index = set_index*(2*m_config.m_assoc)+way;
+        tag_block_t *line = &m_lines[index];
+        if (line->m_tag == tag) {
+            if ( line->m_status == RESERVED ) { //allocated but no position
+                idx = index;
+                return HIT_RESERVED;
+            } else if ( line->m_status == VALID ) { // position is there and in data_store
+                idx = index;
+                return HIT;
+            } else if ( line->m_status == MODIFIED ) { // ???
+                idx = index;
+                return HIT;
+            } else { // ???
+                assert( line->m_status == INVALID );
+            }
+        }
+        if (line->m_status != RESERVED) {
+            all_reserved = false;
+            if (line->m_status == INVALID) { // if found free line
+                invalid_line = index;
+            } else { // if no free lines, then find the best candidate to remove
+                // valid line : keep track of most appropriate replacement candidate
+		// if (LFU)
+		if ( line->m_RC < min_RC ) {
+			min_RC = line->m_RC;
+                	valid_line = index;
+                 }
+		// TODO - put LFU in config file
+               /* 
+		if ( m_config.m_replacement_policy == LFU ) { 
+                    if ( line->m_last_access_time < valid_timestamp ) {
+                        valid_timestamp = line->m_last_access_time;
+                        valid_line = index;
+                    }
+                } else if ( m_config.m_replacement_policy == FIFO ) {
+                    if ( line->m_alloc_time < valid_timestamp ) {
+                        valid_timestamp = line->m_alloc_time;
+                        valid_line = index;
+                    }
+                }
+		*/
+            }
+        }
+    }
+    if ( all_reserved ) {
+        assert( m_config.m_alloc_policy == ON_MISS ); 
+        return RESERVATION_FAIL; // miss and not enough space in cache to allocate on miss
+    }
+
+    if ( invalid_line != (unsigned)-1 ) {
+        idx = invalid_line;
+    } else if ( valid_line != (unsigned)-1) {
+        idx = valid_line;
+    } else abort(); // if an unreserved block exists, it is either invalid or replaceable 
+
+    return MISS;
+}
+
+// begin tag_array
 tag_array::~tag_array() 
 {
     delete[] m_lines;
@@ -155,7 +274,7 @@ void tag_array::init( int core_id, int type_id )
     m_type_id = type_id;
 }
 
-// steffygm - cache probe LOOP
+// steffygm - m_tag_array->probe from l1d->access
 enum cache_request_status tag_array::probe( new_addr_type addr, unsigned &idx ) const {
     //assert( m_config.m_write_policy == READ_ONLY );
     unsigned set_index = m_config.set_index(addr);
@@ -1019,6 +1138,7 @@ read_only_cache::access( new_addr_type addr,
 //! A general function that takes the result of a tag_array probe
 //  and performs the correspding functions based on the cache configuration
 //  The access fucntion calls this function
+// steffygm - process_tag_probe from access function
 enum cache_request_status
 data_cache::process_tag_probe( bool wr,
                                enum cache_request_status probe_status,
@@ -1066,6 +1186,7 @@ data_cache::process_tag_probe( bool wr,
 // performing actions specific to each cache when such actions are implemnted.
 // steffygm - access function for cache
 // 		return status for request
+// steffygm - cache->access function from  process_memory_access_queue (shader.cc)
 enum cache_request_status
 data_cache::access( new_addr_type addr,
                     mem_fetch *mf,
@@ -1077,12 +1198,53 @@ data_cache::access( new_addr_type addr,
     bool wr = mf->get_is_write();
     new_addr_type block_addr = m_config.block_addr(addr);
     unsigned cache_index = (unsigned)-1;
-    enum cache_request_status probe_status
-        = m_tag_array->probe( block_addr, cache_index );
-    enum cache_request_status access_status
-        = process_tag_probe( wr, probe_status, addr, cache_index, mf, time, events );
+
+    enum cache_request_status probe_status  = m_tag_array->probe( block_addr, cache_index ); // make probe tagstore isntead of array
+    enum cache_request_status access_status = process_tag_probe( wr, probe_status, addr, cache_index, mf, time, events );
     m_stats.inc_stats(mf->get_access_type(),
         m_stats.select_stats_status(probe_status, access_status));
+    return access_status;
+}
+
+enum cache_request_status
+l1_cache::process_tag_probe( bool wr,
+                               enum cache_request_status probe_status,
+                               new_addr_type addr,
+                               unsigned cache_index,
+                               mem_fetch* mf,
+                               unsigned time,
+                               std::list<cache_event>& events )
+{
+    // Goal - decide to bypass or go to cache 
+    // TODO - start here on tuesday (01/22)
+    // Each function pointer ( m_[rd/wr]_[hit/miss] ) is set in the
+    // data_cache constructor to reflect the corresponding cache configuration
+    // options. Function pointers were used to avoid many long conditional
+    // branches resulting from many cache configuration options.
+    cache_request_status access_status = probe_status;
+    if(wr){ // Write
+        if(probe_status == HIT){
+            access_status = (this->*m_wr_hit)( addr,
+                                      cache_index,
+                                      mf, time, events, probe_status );
+        }else if ( probe_status != RESERVATION_FAIL ) {
+            access_status = (this->*m_wr_miss)( addr,
+                                       cache_index,
+                                       mf, time, events, probe_status );
+        }
+    }else{ // Read
+        if(probe_status == HIT){
+            access_status = (this->*m_rd_hit)( addr,
+                                      cache_index,
+                                      mf, time, events, probe_status );
+        }else if ( probe_status != RESERVATION_FAIL ) {
+            access_status = (this->*m_rd_miss)( addr,
+                                       cache_index,
+                                       mf, time, events, probe_status );
+        }
+    }
+
+    m_bandwidth_management.use_data_port(mf, access_status, events); 
     return access_status;
 }
 
@@ -1096,8 +1258,25 @@ l1_cache::access( new_addr_type addr,
                   unsigned time,
                   std::list<cache_event> &events )
 {
-    return data_cache::access( addr, mf, time, events );
+    assert( mf->get_data_size() <= m_config.get_line_sz());
+    bool wr = mf->get_is_write();
+    new_addr_type block_addr = m_config.block_addr(addr);
+    unsigned cache_index = (unsigned)-1;
+
+    // returns hit/miss and tells where data is or where to put it (cache_index)
+    enum cache_request_status tag_probe_status = m_tag_store->probe( block_addr, cache_index );
+
+    enum cache_request_status probe_status  = m_tag_array->probe( block_addr, cache_index ); // make probe tagstore isntead of array
+	//  TODO - eventually the 2nd argument will need to change to tag_prove_status
+    enum cache_request_status access_status = process_tag_probe( wr, probe_status, addr, cache_index, mf, time, events );
+    m_stats.inc_stats(mf->get_access_type(),
+        m_stats.select_stats_status(probe_status, access_status));
+    return access_status;
 }
+// TODO - if bug with member variabes m_config and/or m_tag_array might have to look into structure
+//{
+//    return data_cache::access( addr, mf, time, events );
+//}
 
 // The l2 cache access function calls the base data_cache access
 // implementation.  When the L2 needs to diverge from L1, L2 specific

@@ -1325,6 +1325,7 @@ ldst_unit::process_cache_access( cache_t* cache,
     return result;
 }
 
+// steffygm - process_memory_access_queue -> from memory cycle()
 mem_stage_stall_type ldst_unit::process_memory_access_queue( cache_t *cache, warp_inst_t &inst )
 {
     mem_stage_stall_type result = NO_RC_FAIL;
