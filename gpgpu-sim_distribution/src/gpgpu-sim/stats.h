@@ -53,6 +53,7 @@ enum mem_stage_stall_type {
    DATA_PORT_STALL,
    WB_ICNT_RC_FAIL,
    WB_CACHE_RSRV_FAIL,
+   BYPASS_L1D,
    N_MEM_STAGE_STALL_TYPE
 };
 

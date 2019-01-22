@@ -32,19 +32,19 @@
 #define MAX_DEFAULT_CACHE_SIZE_MULTIBLIER 4
 // used to allocate memory that is large enough to adapt the changes in cache size across kernels
 
-const char * cache_request_status_str(enum cache_request_status status) 
+const char * cache_request_status_str(enum cache_request_status status)
 {
    static const char * static_cache_request_status_str[] = {
       "HIT",
       "HIT_RESERVED",
       "MISS",
       "RESERVATION_FAIL"
-   }; 
+   };
 
-   assert(sizeof(static_cache_request_status_str) / sizeof(const char*) == NUM_CACHE_REQUEST_STATUS); 
-   assert(status < NUM_CACHE_REQUEST_STATUS); 
+   assert(sizeof(static_cache_request_status_str) / sizeof(const char*) == NUM_CACHE_REQUEST_STATUS);
+   assert(status < NUM_CACHE_REQUEST_STATUS);
 
-   return static_cache_request_status_str[status]; 
+   return static_cache_request_status_str[status];
 }
 
 unsigned l1d_cache_config::set_index(new_addr_type addr) const{
@@ -111,7 +111,7 @@ unsigned l2_cache_config::set_index(new_addr_type addr) const{
 	}
 }
 // steffygm - BEGIN tag_store implementation
-tag_store::~tag_store() 
+tag_store::~tag_store()
 {
     delete[] m_lines;
 }
@@ -152,7 +152,7 @@ void tag_store::init( int core_id, int type_id )
     m_prev_snapshot_access = 0;
     m_prev_snapshot_miss = 0;
     m_prev_snapshot_pending_hit = 0;
-    m_core_id = core_id; 
+    m_core_id = core_id;
     m_type_id = type_id;
 }
 
@@ -180,43 +180,31 @@ enum cache_request_status tag_store::probe( new_addr_type addr, unsigned &idx ) 
             } else if ( line->m_status == VALID ) { // position is there and in data_store
                 idx = index;
                 return HIT;
-            } else if ( line->m_status == MODIFIED ) { // ???
-                idx = index;
-                return HIT;
-            } else { // ???
+            } else { // INVALID (not allocated)
                 assert( line->m_status == INVALID );
             }
         }
-        if (line->m_status != RESERVED) {
+        if (line->m_status != RESERVED)
+        {
             all_reserved = false;
-            if (line->m_status == INVALID) { // if found free line
+            if (line->m_status == INVALID)
+            {
+                // if found free line
                 invalid_line = index;
             } else { // if no free lines, then find the best candidate to remove
                 // valid line : keep track of most appropriate replacement candidate
-		// if (LFU)
-		if ( line->m_RC < min_RC ) {
-			min_RC = line->m_RC;
-                	valid_line = index;
-                 }
-		// TODO - put LFU in config file
-               /* 
-		if ( m_config.m_replacement_policy == LFU ) { 
-                    if ( line->m_last_access_time < valid_timestamp ) {
-                        valid_timestamp = line->m_last_access_time;
-                        valid_line = index;
-                    }
-                } else if ( m_config.m_replacement_policy == FIFO ) {
-                    if ( line->m_alloc_time < valid_timestamp ) {
-                        valid_timestamp = line->m_alloc_time;
-                        valid_line = index;
-                    }
+            		// if (LFU)
+            		if ( line->m_RC < min_RC )
+                {
+            			min_RC = line->m_RC;
+                  valid_line = index;
                 }
-		*/
+            		// TODO - put LFU in config file
             }
         }
     }
     if ( all_reserved ) {
-        assert( m_config.m_alloc_policy == ON_MISS ); 
+        assert( m_config.m_alloc_policy == ON_MISS );
         return RESERVATION_FAIL; // miss and not enough space in cache to allocate on miss
     }
 
@@ -224,13 +212,27 @@ enum cache_request_status tag_store::probe( new_addr_type addr, unsigned &idx ) 
         idx = invalid_line;
     } else if ( valid_line != (unsigned)-1) {
         idx = valid_line;
-    } else abort(); // if an unreserved block exists, it is either invalid or replaceable 
+    } else abort(); // if an unreserved block exists, it is either invalid or replaceable
 
     return MISS;
 }
 
+void tag_store::allocate_new_entry(new_addr_type tag, unsigned cache_index)
+{
+    m_lines[cache_index].allocate(tag);
+}
+
+enum tag_block_position_status get_tag_block_position(unsigned cache_index)
+{
+    return m_lines[cache_index].m_pos;
+}
+void update_tag_block_position(enum tag_block_position_status new_position_status, unsigned cache_index)
+{
+    m_lines[cache_index].m_pos = new_position_status;
+}
+
 // begin tag_array
-tag_array::~tag_array() 
+tag_array::~tag_array()
 {
     delete[] m_lines;
 }
@@ -270,7 +272,7 @@ void tag_array::init( int core_id, int type_id )
     m_prev_snapshot_access = 0;
     m_prev_snapshot_miss = 0;
     m_prev_snapshot_pending_hit = 0;
-    m_core_id = core_id; 
+    m_core_id = core_id;
     m_type_id = type_id;
 }
 
@@ -325,7 +327,7 @@ enum cache_request_status tag_array::probe( new_addr_type addr, unsigned &idx ) 
         }
     }
     if ( all_reserved ) {
-        assert( m_config.m_alloc_policy == ON_MISS ); 
+        assert( m_config.m_alloc_policy == ON_MISS );
         return RESERVATION_FAIL; // miss and not enough space in cache to allocate on miss
     }
 
@@ -333,7 +335,7 @@ enum cache_request_status tag_array::probe( new_addr_type addr, unsigned &idx ) 
         idx = invalid_line;
     } else if ( valid_line != (unsigned)-1) {
         idx = valid_line;
-    } else abort(); // if an unreserved block exists, it is either invalid or replaceable 
+    } else abort(); // if an unreserved block exists, it is either invalid or replaceable
 
     return MISS;
 }
@@ -347,16 +349,16 @@ enum cache_request_status tag_array::access( new_addr_type addr, unsigned time, 
     return result;
 }
 
-enum cache_request_status tag_array::access( new_addr_type addr, unsigned time, unsigned &idx, bool &wb, cache_block_t &evicted ) 
+enum cache_request_status tag_array::access( new_addr_type addr, unsigned time, unsigned &idx, bool &wb, cache_block_t &evicted )
 {
     m_access++;
     shader_cache_access_log(m_core_id, m_type_id, 0); // log accesses to cache
     enum cache_request_status status = probe(addr,idx);
     switch (status) {
-    case HIT_RESERVED: 
+    case HIT_RESERVED:
         m_pending_hit++;
-    case HIT: 
-        m_lines[idx].m_last_access_time=time; 
+    case HIT:
+        m_lines[idx].m_last_access_time=time;
         break;
     case MISS:
         m_miss++;
@@ -391,13 +393,13 @@ void tag_array::fill( new_addr_type addr, unsigned time )
     m_lines[idx].fill(time);
 }
 
-void tag_array::fill( unsigned index, unsigned time ) 
+void tag_array::fill( unsigned index, unsigned time )
 {
     assert( m_config.m_alloc_policy == ON_MISS );
     m_lines[index].fill(time);
 }
 
-void tag_array::flush() 
+void tag_array::flush()
 {
     for (unsigned i=0; i < m_config.get_num_lines(); i++)
         m_lines[i].m_status = INVALID;
@@ -425,8 +427,8 @@ void tag_array::new_window()
 void tag_array::print( FILE *stream, unsigned &total_access, unsigned &total_misses ) const
 {
     m_config.print(stream);
-    fprintf( stream, "\t\tAccess = %d, Miss = %d (%.3g), PendingHit = %d (%.3g)\n", 
-             m_access, m_miss, (float) m_miss / m_access, 
+    fprintf( stream, "\t\tAccess = %d, Miss = %d (%.3g), PendingHit = %d (%.3g)\n",
+             m_access, m_miss, (float) m_miss / m_access,
              m_pending_hit, (float) m_pending_hit / m_access);
     total_misses+=m_miss;
     total_access+=m_access;
@@ -444,7 +446,7 @@ void tag_array::get_stats(unsigned &total_access, unsigned &total_misses, unsign
 bool was_write_sent( const std::list<cache_event> &events )
 {
     for( std::list<cache_event>::const_iterator e=events.begin(); e!=events.end(); e++ ) {
-        if( *e == WRITE_REQUEST_SENT ) 
+        if( *e == WRITE_REQUEST_SENT )
             return true;
     }
     return false;
@@ -453,7 +455,7 @@ bool was_write_sent( const std::list<cache_event> &events )
 bool was_writeback_sent( const std::list<cache_event> &events )
 {
     for( std::list<cache_event>::const_iterator e=events.begin(); e!=events.end(); e++ ) {
-        if( *e == WRITE_BACK_REQUEST_SENT ) 
+        if( *e == WRITE_BACK_REQUEST_SENT )
             return true;
     }
     return false;
@@ -462,7 +464,7 @@ bool was_writeback_sent( const std::list<cache_event> &events )
 bool was_read_sent( const std::list<cache_event> &events )
 {
     for( std::list<cache_event>::const_iterator e=events.begin(); e!=events.end(); e++ ) {
-        if( *e == READ_REQUEST_SENT ) 
+        if( *e == READ_REQUEST_SENT )
             return true;
     }
     return false;
@@ -540,9 +542,9 @@ cache_stats::cache_stats(){
     for(unsigned i=0; i<NUM_MEM_ACCESS_TYPE; ++i){
         m_stats[i].resize(NUM_CACHE_REQUEST_STATUS, 0);
     }
-    m_cache_port_available_cycles = 0; 
-    m_cache_data_port_busy_cycles = 0; 
-    m_cache_fill_port_busy_cycles = 0; 
+    m_cache_port_available_cycles = 0;
+    m_cache_data_port_busy_cycles = 0;
+    m_cache_fill_port_busy_cycles = 0;
 }
 
 void cache_stats::clear(){
@@ -552,9 +554,9 @@ void cache_stats::clear(){
     for(unsigned i=0; i<NUM_MEM_ACCESS_TYPE; ++i){
         std::fill(m_stats[i].begin(), m_stats[i].end(), 0);
     }
-    m_cache_port_available_cycles = 0; 
-    m_cache_data_port_busy_cycles = 0; 
-    m_cache_fill_port_busy_cycles = 0; 
+    m_cache_port_available_cycles = 0;
+    m_cache_data_port_busy_cycles = 0;
+    m_cache_fill_port_busy_cycles = 0;
 }
 
 void cache_stats::inc_stats(int access_type, int access_outcome){
@@ -609,9 +611,9 @@ cache_stats cache_stats::operator+(const cache_stats &cs){
             ret(type, status) = m_stats[type][status] + cs(type, status);
         }
     }
-    ret.m_cache_port_available_cycles = m_cache_port_available_cycles + cs.m_cache_port_available_cycles; 
-    ret.m_cache_data_port_busy_cycles = m_cache_data_port_busy_cycles + cs.m_cache_data_port_busy_cycles; 
-    ret.m_cache_fill_port_busy_cycles = m_cache_fill_port_busy_cycles + cs.m_cache_fill_port_busy_cycles; 
+    ret.m_cache_port_available_cycles = m_cache_port_available_cycles + cs.m_cache_port_available_cycles;
+    ret.m_cache_data_port_busy_cycles = m_cache_data_port_busy_cycles + cs.m_cache_data_port_busy_cycles;
+    ret.m_cache_fill_port_busy_cycles = m_cache_fill_port_busy_cycles + cs.m_cache_fill_port_busy_cycles;
     return ret;
 }
 
@@ -624,9 +626,9 @@ cache_stats &cache_stats::operator+=(const cache_stats &cs){
             m_stats[type][status] += cs(type, status);
         }
     }
-    m_cache_port_available_cycles += cs.m_cache_port_available_cycles; 
-    m_cache_data_port_busy_cycles += cs.m_cache_data_port_busy_cycles; 
-    m_cache_fill_port_busy_cycles += cs.m_cache_fill_port_busy_cycles; 
+    m_cache_port_available_cycles += cs.m_cache_port_available_cycles;
+    m_cache_data_port_busy_cycles += cs.m_cache_data_port_busy_cycles;
+    m_cache_fill_port_busy_cycles += cs.m_cache_fill_port_busy_cycles;
     return *this;
 }
 
@@ -653,16 +655,16 @@ void cache_stats::print_stats(FILE *fout, const char *cache_name) const{
 
 void cache_sub_stats::print_port_stats(FILE *fout, const char *cache_name) const
 {
-    float data_port_util = 0.0f; 
+    float data_port_util = 0.0f;
     if (port_available_cycles > 0) {
-        data_port_util = (float) data_port_busy_cycles / port_available_cycles; 
+        data_port_util = (float) data_port_busy_cycles / port_available_cycles;
     }
-    fprintf(fout, "%s_data_port_util = %.3f\n", cache_name, data_port_util); 
-    float fill_port_util = 0.0f; 
+    fprintf(fout, "%s_data_port_util = %.3f\n", cache_name, data_port_util);
+    float fill_port_util = 0.0f;
     if (port_available_cycles > 0) {
-        fill_port_util = (float) fill_port_busy_cycles / port_available_cycles; 
+        fill_port_util = (float) fill_port_busy_cycles / port_available_cycles;
     }
-    fprintf(fout, "%s_fill_port_util = %.3f\n", cache_name, fill_port_util); 
+    fprintf(fout, "%s_fill_port_util = %.3f\n", cache_name, fill_port_util);
 }
 
 unsigned cache_stats::get_stats(enum mem_access_type *access_type, unsigned num_access_type, enum cache_request_status *access_status, unsigned num_access_status) const{
@@ -704,9 +706,9 @@ void cache_stats::get_sub_stats(struct cache_sub_stats &css) const{
         }
     }
 
-    t_css.port_available_cycles = m_cache_port_available_cycles; 
-    t_css.data_port_busy_cycles = m_cache_data_port_busy_cycles; 
-    t_css.fill_port_busy_cycles = m_cache_fill_port_busy_cycles; 
+    t_css.port_available_cycles = m_cache_port_available_cycles;
+    t_css.data_port_busy_cycles = m_cache_data_port_busy_cycles;
+    t_css.fill_port_busy_cycles = m_cache_fill_port_busy_cycles;
 
     css = t_css;
 }
@@ -721,83 +723,83 @@ bool cache_stats::check_valid(int type, int status) const{
         return false;
 }
 
-void cache_stats::sample_cache_port_utility(bool data_port_busy, bool fill_port_busy) 
+void cache_stats::sample_cache_port_utility(bool data_port_busy, bool fill_port_busy)
 {
-    m_cache_port_available_cycles += 1; 
+    m_cache_port_available_cycles += 1;
     if (data_port_busy) {
-        m_cache_data_port_busy_cycles += 1; 
-    } 
+        m_cache_data_port_busy_cycles += 1;
+    }
     if (fill_port_busy) {
-        m_cache_fill_port_busy_cycles += 1; 
-    } 
+        m_cache_fill_port_busy_cycles += 1;
+    }
 }
 
-baseline_cache::bandwidth_management::bandwidth_management(cache_config &config) 
+baseline_cache::bandwidth_management::bandwidth_management(cache_config &config)
 : m_config(config)
 {
-    m_data_port_occupied_cycles = 0; 
-    m_fill_port_occupied_cycles = 0; 
+    m_data_port_occupied_cycles = 0;
+    m_fill_port_occupied_cycles = 0;
 }
 
-/// use the data port based on the outcome and events generated by the mem_fetch request 
+/// use the data port based on the outcome and events generated by the mem_fetch request
 void baseline_cache::bandwidth_management::use_data_port(mem_fetch *mf, enum cache_request_status outcome, const std::list<cache_event> &events)
 {
-    unsigned data_size = mf->get_data_size(); 
-    unsigned port_width = m_config.m_data_port_width; 
+    unsigned data_size = mf->get_data_size();
+    unsigned port_width = m_config.m_data_port_width;
     switch (outcome) {
     case HIT: {
-        unsigned data_cycles = data_size / port_width + ((data_size % port_width > 0)? 1 : 0); 
-        m_data_port_occupied_cycles += data_cycles; 
-        } break; 
-    case HIT_RESERVED: 
+        unsigned data_cycles = data_size / port_width + ((data_size % port_width > 0)? 1 : 0);
+        m_data_port_occupied_cycles += data_cycles;
+        } break;
+    case HIT_RESERVED:
     case MISS: {
-        // the data array is accessed to read out the entire line for write-back 
+        // the data array is accessed to read out the entire line for write-back
         if (was_writeback_sent(events)) {
-            unsigned data_cycles = m_config.m_line_sz / port_width; 
-            m_data_port_occupied_cycles += data_cycles; 
+            unsigned data_cycles = m_config.m_line_sz / port_width;
+            m_data_port_occupied_cycles += data_cycles;
         }
-        } break; 
-    case RESERVATION_FAIL: 
-        // Does not consume any port bandwidth 
-        break; 
-    default: 
-        assert(0); 
-        break; 
-    } 
+        } break;
+    case RESERVATION_FAIL:
+        // Does not consume any port bandwidth
+        break;
+    default:
+        assert(0);
+        break;
+    }
 }
 
-/// use the fill port 
+/// use the fill port
 void baseline_cache::bandwidth_management::use_fill_port(mem_fetch *mf)
 {
-    // assume filling the entire line with the returned request 
-    unsigned fill_cycles = m_config.m_line_sz / m_config.m_data_port_width; 
-    m_fill_port_occupied_cycles += fill_cycles; 
+    // assume filling the entire line with the returned request
+    unsigned fill_cycles = m_config.m_line_sz / m_config.m_data_port_width;
+    m_fill_port_occupied_cycles += fill_cycles;
 }
 
-/// called every cache cycle to free up the ports 
+/// called every cache cycle to free up the ports
 void baseline_cache::bandwidth_management::replenish_port_bandwidth()
 {
     if (m_data_port_occupied_cycles > 0) {
-        m_data_port_occupied_cycles -= 1; 
+        m_data_port_occupied_cycles -= 1;
     }
-    assert(m_data_port_occupied_cycles >= 0); 
+    assert(m_data_port_occupied_cycles >= 0);
 
     if (m_fill_port_occupied_cycles > 0) {
-        m_fill_port_occupied_cycles -= 1; 
+        m_fill_port_occupied_cycles -= 1;
     }
-    assert(m_fill_port_occupied_cycles >= 0); 
+    assert(m_fill_port_occupied_cycles >= 0);
 }
 
-/// query for data port availability 
+/// query for data port availability
 bool baseline_cache::bandwidth_management::data_port_free() const
 {
-    return (m_data_port_occupied_cycles == 0); 
+    return (m_data_port_occupied_cycles == 0);
 }
 
-/// query for fill port availability 
+/// query for fill port availability
 bool baseline_cache::bandwidth_management::fill_port_free() const
 {
-    return (m_fill_port_occupied_cycles == 0); 
+    return (m_fill_port_occupied_cycles == 0);
 }
 
 /// Sends next request to lower level of memory
@@ -809,10 +811,10 @@ void baseline_cache::cycle(){
             m_memport->push(mf);
         }
     }
-    bool data_port_busy = !m_bandwidth_management.data_port_free(); 
-    bool fill_port_busy = !m_bandwidth_management.fill_port_free(); 
-    m_stats.sample_cache_port_utility(data_port_busy, fill_port_busy); 
-    m_bandwidth_management.replenish_port_bandwidth(); 
+    bool data_port_busy = !m_bandwidth_management.data_port_free();
+    bool fill_port_busy = !m_bandwidth_management.fill_port_free();
+    m_stats.sample_cache_port_utility(data_port_busy, fill_port_busy);
+    m_bandwidth_management.replenish_port_bandwidth();
 }
 
 /// Interface for response from lower memory level (model bandwidth restictions in caller)
@@ -834,7 +836,7 @@ void baseline_cache::fill(mem_fetch *mf, unsigned time){
         block.m_status = MODIFIED; // mark line as dirty for atomic operation
     }
     m_extra_mf_fields.erase(mf);
-    m_bandwidth_management.use_fill_port(mf); 
+    m_bandwidth_management.use_fill_port(mf);
 }
 
 /// Checks if mf is waiting to be filled by lower memory level
@@ -971,9 +973,9 @@ data_cache::wr_miss_wa( new_addr_type addr,
     // Conservatively ensure the worst-case request can be handled this cycle
     bool mshr_hit = m_mshrs.probe(block_addr);
     bool mshr_avail = !m_mshrs.full(block_addr);
-    if(miss_queue_full(2) 
-        || (!(mshr_hit && mshr_avail) 
-        && !(!mshr_hit && mshr_avail 
+    if(miss_queue_full(2)
+        || (!(mshr_hit && mshr_avail)
+        && !(!mshr_hit && mshr_avail
         && (m_miss_queue.size() < m_config.m_miss_queue_size))))
         return RESERVATION_FAIL;
 
@@ -1008,7 +1010,7 @@ data_cache::wr_miss_wa( new_addr_type addr,
     if( do_miss ){
         // If evicted block is modified and not a write-through
         // (already modified lower level)
-        if( wb && (m_config.m_write_policy != WRITE_THROUGH) ) { 
+        if( wb && (m_config.m_write_policy != WRITE_THROUGH) ) {
             mem_fetch *wb = m_memfetch_creator->alloc(evicted.m_block_addr,
                 m_wrbk_type,m_config.get_line_sz(),true);
             m_miss_queue.push_back(wb);
@@ -1054,7 +1056,7 @@ data_cache::rd_hit_base( new_addr_type addr,
     m_tag_array->access(block_addr,time,cache_index);
     // Atomics treated as global read/write requests - Perform read, mark line as
     // MODIFIED
-    if(mf->isatomic()){ 
+    if(mf->isatomic()){
         assert(mf->get_access_type() == GLOBAL_ACC_R);
         cache_block_t &block = m_tag_array->get_block(cache_index);
         block.m_status = MODIFIED;  // mark line as dirty
@@ -1076,7 +1078,7 @@ data_cache::rd_miss_base( new_addr_type addr,
     if(miss_queue_full(1))
         // cannot handle request this cycle
         // (might need to generate two requests)
-        return RESERVATION_FAIL; 
+        return RESERVATION_FAIL;
 
     new_addr_type block_addr = m_config.block_addr(addr);
     bool do_miss = false;
@@ -1090,7 +1092,7 @@ data_cache::rd_miss_base( new_addr_type addr,
     if( do_miss ){
         // If evicted block is modified and not a write-through
         // (already modified lower level)
-        if(wb && (m_config.m_write_policy != WRITE_THROUGH) ){ 
+        if(wb && (m_config.m_write_policy != WRITE_THROUGH) ){
             mem_fetch *wb = m_memfetch_creator->alloc(evicted.m_block_addr,
                 m_wrbk_type,m_config.get_line_sz(),true);
         send_write_request(wb, WRITE_BACK_REQUEST_SENT, time, events);
@@ -1175,7 +1177,7 @@ data_cache::process_tag_probe( bool wr,
         }
     }
 
-    m_bandwidth_management.use_data_port(mf, access_status, events); 
+    m_bandwidth_management.use_data_port(mf, access_status, events);
     return access_status;
 }
 
@@ -1206,6 +1208,50 @@ data_cache::access( new_addr_type addr,
     return access_status;
 }
 
+enum cache_request_status l1_cache::process_tag_store_probe(enum cache_request_status status,
+                                                            unsigned cache_index)
+{
+  if(status == HIT)
+  {
+    enum tag_block_position_status block_pos_status = get_tag_block_position(unsigned cache_index);
+    if(block_pos_status==T_VALID)
+    {
+      m_tag_store->inc_tag_block_rc(cache_index);
+      return HIT;
+    }
+    else // pos is invalid
+    {
+      unsigned rc = m_tag_store->inc_tag_block_rc(cache_index);
+      // TODO move threshold to config FILE
+      if(rc > 2)
+      {
+        //TODO dynamic aging
+        return MISS;
+      }
+      else
+      {
+        return BYPASS;
+      }
+    }
+  }
+  else if(status == MISS)
+  {
+    //alloc new tag_store entry
+    m_tag_store->allocate_new_entry(tag, cache_index);
+    //bypass
+    return BYPASS;
+  }
+  else if(status == HIT_RESERVED)
+  {
+
+  }
+  else // RESERVATION_FAIL
+  {
+
+  }
+}
+
+/*
 enum cache_request_status
 l1_cache::process_tag_probe( bool wr,
                                enum cache_request_status probe_status,
@@ -1215,8 +1261,9 @@ l1_cache::process_tag_probe( bool wr,
                                unsigned time,
                                std::list<cache_event>& events )
 {
-    // Goal - decide to bypass or go to cache 
+    // Goal - decide to bypass or go to cache
     // TODO - start here on tuesday (01/22)
+
     // Each function pointer ( m_[rd/wr]_[hit/miss] ) is set in the
     // data_cache constructor to reflect the corresponding cache configuration
     // options. Function pointers were used to avoid many long conditional
@@ -1244,10 +1291,10 @@ l1_cache::process_tag_probe( bool wr,
         }
     }
 
-    m_bandwidth_management.use_data_port(mf, access_status, events); 
+    m_bandwidth_management.use_data_port(mf, access_status, events);
     return access_status;
 }
-
+*/
 /// This is meant to model the first level data cache in Fermi.
 /// It is write-evict (global) or write-back (local) at the
 /// granularity of individual blocks (Set by GPGPU-Sim configuration file)
@@ -1265,10 +1312,18 @@ l1_cache::access( new_addr_type addr,
 
     // returns hit/miss and tells where data is or where to put it (cache_index)
     enum cache_request_status tag_probe_status = m_tag_store->probe( block_addr, cache_index );
+    // returns hit, miss, or bypass
+    enum cache_request_status tag_probe_processed_status = process_tag_store_probe(tag_probe_status, cache_index);
+    //enum cache_request_status probe_status  = m_tag_array->probe( block_addr, cache_index ); // make probe tagstore isntead of array
 
-    enum cache_request_status probe_status  = m_tag_array->probe( block_addr, cache_index ); // make probe tagstore isntead of array
-	//  TODO - eventually the 2nd argument will need to change to tag_prove_status
-    enum cache_request_status access_status = process_tag_probe( wr, probe_status, addr, cache_index, mf, time, events );
+
+    if (tag_probe_processed_status == BYPASS)
+    {
+      return BYPASS;
+    }
+
+    // if not bypass, process like regular l1 data cache
+    enum cache_request_status access_status = process_tag_probe( wr, tag_probe_processed_status, addr, cache_index, mf, time, events );
     m_stats.inc_stats(mf->get_access_type(),
         m_stats.select_stats_status(probe_status, access_status));
     return access_status;
@@ -1414,4 +1469,3 @@ void tex_cache::display_state( FILE *fp ) const
     }
 }
 /******************************************************************************************************************************************/
-
