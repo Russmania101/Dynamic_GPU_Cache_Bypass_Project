@@ -347,6 +347,7 @@ protected:
     enum set_index_function m_set_index_function; // Hash, linear, or custom set index function
 
     friend class tag_array;
+    friend class tag_store;
     friend class baseline_cache;
     friend class read_only_cache;
     friend class tex_cache;
@@ -410,7 +411,7 @@ public:
     //void fill( unsigned idx, unsigned time );
 
     unsigned size() const { return m_config.get_num_lines();}
-    //cache_block_t &get_block(unsigned idx) { return m_lines[idx];}
+    tag_block_t &get_block(unsigned idx) { return m_lines[idx];}
 
     void flush(); // flash invalidate all entries
     void new_window();
@@ -1048,7 +1049,8 @@ public:
     l1_cache(const char *name, cache_config &config,
             int core_id, int type_id, mem_fetch_interface *memport,
             mem_fetch_allocator *mfcreator, enum mem_fetch_status status )
-            : data_cache(name,config,core_id,type_id,memport,mfcreator,status, L1_WR_ALLOC_R, L1_WRBK_ACC){}
+            : data_cache(name,config,core_id,type_id,memport,mfcreator,status, L1_WR_ALLOC_R, L1_WRBK_ACC),
+            m_tag_store(new tag_store(config,core_id,type_id)){}
 
     virtual ~l1_cache(){}
 
@@ -1060,18 +1062,20 @@ public:
 
     //  The access fucntion calls this function
     //  overwrites datacache
-    /*
+
     enum cache_request_status
         process_tag_probe( bool wr,
                            enum cache_request_status status,
                            new_addr_type addr,
+                           unsigned tag_index,
                            unsigned cache_index,
                            mem_fetch* mf,
                            unsigned time,
                            std::list<cache_event>& events );
-    */
+
     // TODO verify return type
     enum cache_request_status process_tag_store_probe(enum cache_request_status status,
+                                                      new_addr_type block_addr,
                                                       unsigned cache_index);
 
 protected:

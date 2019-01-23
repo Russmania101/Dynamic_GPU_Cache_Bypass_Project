@@ -222,11 +222,11 @@ void tag_store::allocate_new_entry(new_addr_type tag, unsigned cache_index)
     m_lines[cache_index].allocate(tag);
 }
 
-enum tag_block_position_status get_tag_block_position(unsigned cache_index)
+enum tag_block_position_status tag_store::get_tag_block_position(unsigned cache_index)
 {
     return m_lines[cache_index].m_pos;
 }
-void update_tag_block_position(enum tag_block_position_status new_position_status, unsigned cache_index)
+void tag_store::update_tag_block_position(enum tag_block_position_status new_position_status, unsigned cache_index)
 {
     m_lines[cache_index].m_pos = new_position_status;
 }
@@ -912,6 +912,7 @@ cache_request_status data_cache::wr_hit_wb(new_addr_type addr, unsigned cache_in
 	new_addr_type block_addr = m_config.block_addr(addr);
 	m_tag_array->access(block_addr,time,cache_index); // update LRU state
 	cache_block_t &block = m_tag_array->get_block(cache_index);
+  // TODO bookmark
 	block.m_status = MODIFIED;
 
 	return HIT;
@@ -1209,11 +1210,13 @@ data_cache::access( new_addr_type addr,
 }
 
 enum cache_request_status l1_cache::process_tag_store_probe(enum cache_request_status status,
+                                                            new_addr_type block_addr,
                                                             unsigned cache_index)
 {
+  new_addr_type tag = m_config.tag(block_addr);
   if(status == HIT)
   {
-    enum tag_block_position_status block_pos_status = get_tag_block_position(unsigned cache_index);
+    enum tag_block_position_status block_pos_status = m_tag_store->get_tag_block_position(cache_index);
     if(block_pos_status==T_VALID)
     {
       m_tag_store->inc_tag_block_rc(cache_index);
@@ -1241,34 +1244,31 @@ enum cache_request_status l1_cache::process_tag_store_probe(enum cache_request_s
     //bypass
     return BYPASS;
   }
-  else if(status == HIT_RESERVED)
-  {
-
-  }
-  else // RESERVATION_FAIL
-  {
-
-  }
+  return status;
 }
 
-/*
+
 enum cache_request_status
 l1_cache::process_tag_probe( bool wr,
                                enum cache_request_status probe_status,
                                new_addr_type addr,
+                               unsigned tag_index,
                                unsigned cache_index,
                                mem_fetch* mf,
                                unsigned time,
                                std::list<cache_event>& events )
 {
-    // Goal - decide to bypass or go to cache
-    // TODO - start here on tuesday (01/22)
-
     // Each function pointer ( m_[rd/wr]_[hit/miss] ) is set in the
     // data_cache constructor to reflect the corresponding cache configuration
     // options. Function pointers were used to avoid many long conditional
     // branches resulting from many cache configuration options.
     cache_request_status access_status = probe_status;
+
+    //use addr/idx to find out who is getting evicted
+    cache_block_t &possible_evict_block = m_tag_array->get_block(cache_index);
+    new_addr_type possible_evict_tag = possible_evict_block.m_tag;
+    new_addr_type possible_evict_addr = possible_evict_block.m_block_addr;
+
     if(wr){ // Write
         if(probe_status == HIT){
             access_status = (this->*m_wr_hit)( addr,
@@ -1291,10 +1291,62 @@ l1_cache::process_tag_probe( bool wr,
         }
     }
 
+    if (probe_status == MISS)
+    {
+
+
+        // if eviction, set evicted entry in tag store to pos=invalid, RC=0, etc...
+        cache_block_t &replace_evict_block = m_tag_array->get_block(cache_index);
+        new_addr_type replace_evict_addr = replace_evict_block.m_block_addr;
+        if(possible_evict_addr != replace_evict_addr) //evicted
+        {
+          new_addr_type set_e_index = m_config.set_index(possible_evict_addr);
+          for (unsigned t_way=0; t_way<(2*m_config.m_assoc); t_way++) {
+              unsigned t_index = set_e_index*(2*m_config.m_assoc)+t_way;
+              tag_block_t &t_line = m_tag_store->get_block(t_index);
+              if (t_line.m_tag == possible_evict_tag)
+              {
+                t_line.m_RC=0;
+        	      t_line.m_pos=T_INVALID;
+                t_line.m_tag=0;
+                t_line.m_status=INVALID;
+                break;
+              }
+          }
+        }
+
+        // tag_store_entry now is good to go
+        new_addr_type block_addr = m_config.block_addr(addr);
+        new_addr_type new_tag   = m_config.tag(block_addr);
+        tag_block_t &new_tag_line = m_tag_store->get_block(tag_index);
+        new_tag_line.fill();
+
+        //        Dynamic Aging
+        new_addr_type set_index = m_config.set_index(block_addr);
+        for (unsigned d_way=0; d_way<m_config.m_assoc; d_way++) {
+            unsigned d_index = set_index*m_config.m_assoc+d_way;
+            cache_block_t &d_line = m_tag_array->get_block(d_index);
+            if (d_line.m_tag != new_tag)
+            {
+              // TODO add double size to config
+              for (unsigned t_way=0; t_way<(2*m_config.m_assoc); t_way++) {
+                  unsigned t_index = set_index*(2*m_config.m_assoc)+t_way;
+                  tag_block_t &t_line = m_tag_store->get_block(t_index);
+                  if (t_line.m_tag == d_line.m_tag)
+                  {
+                    m_tag_store->dec_tag_block_rc(t_index);
+                    break;
+                  }
+              }
+            }
+          }
+    }
+
     m_bandwidth_management.use_data_port(mf, access_status, events);
     return access_status;
 }
-*/
+
+
 /// This is meant to model the first level data cache in Fermi.
 /// It is write-evict (global) or write-back (local) at the
 /// granularity of individual blocks (Set by GPGPU-Sim configuration file)
@@ -1308,13 +1360,13 @@ l1_cache::access( new_addr_type addr,
     assert( mf->get_data_size() <= m_config.get_line_sz());
     bool wr = mf->get_is_write();
     new_addr_type block_addr = m_config.block_addr(addr);
+    unsigned tag_index = (unsigned) -1;
     unsigned cache_index = (unsigned)-1;
 
     // returns hit/miss and tells where data is or where to put it (cache_index)
-    enum cache_request_status tag_probe_status = m_tag_store->probe( block_addr, cache_index );
+    enum cache_request_status tag_probe_status = m_tag_store->probe( block_addr, tag_index );
     // returns hit, miss, or bypass
-    enum cache_request_status tag_probe_processed_status = process_tag_store_probe(tag_probe_status, cache_index);
-    //enum cache_request_status probe_status  = m_tag_array->probe( block_addr, cache_index ); // make probe tagstore isntead of array
+    enum cache_request_status tag_probe_processed_status = process_tag_store_probe(tag_probe_status, block_addr, tag_index);
 
 
     if (tag_probe_processed_status == BYPASS)
@@ -1322,10 +1374,14 @@ l1_cache::access( new_addr_type addr,
       return BYPASS;
     }
 
+
     // if not bypass, process like regular l1 data cache
-    enum cache_request_status access_status = process_tag_probe( wr, tag_probe_processed_status, addr, cache_index, mf, time, events );
+    enum cache_request_status cache_probe_status  = m_tag_array->probe( block_addr, cache_index ); // make probe tagstore isntead of array
+
+    // this calls the l1_cache version
+    enum cache_request_status access_status = process_tag_probe( wr, tag_probe_processed_status, addr, tag_index, cache_index, mf, time, events );
     m_stats.inc_stats(mf->get_access_type(),
-        m_stats.select_stats_status(probe_status, access_status));
+        m_stats.select_stats_status(tag_probe_processed_status, access_status));
     return access_status;
 }
 // TODO - if bug with member variabes m_config and/or m_tag_array might have to look into structure
