@@ -1338,12 +1338,18 @@ mem_stage_stall_type ldst_unit::process_memory_access_queue( cache_t *cache, war
     //const mem_access_t &access = inst.accessq_back();
     mem_fetch *mf = m_mf_allocator->alloc(inst,inst.accessq_back());
     std::list<cache_event> events;
-    //steffygm - important enum
+
+    // calls l1_cache::access() implementation for the L1 Cache, otherwise
+    // it goes to the data_cache::access() implementation
     enum cache_request_status status = cache->access(mf->get_addr(),mf,gpu_sim_cycle+gpu_tot_sim_cycle,events);
+
+    // if the cache access() returns bypass, then return the BYPASS stall_cond
     if(status == BYPASS)
     {
       return BYPASS_L1D;
     }
+
+
     return process_cache_access( cache, mf->get_addr(), inst, events, mf, status );
 }
 
@@ -1391,6 +1397,8 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
    mem_stage_stall_type stall_cond = NO_RC_FAIL;
    const mem_access_t &access = inst.accessq_back();
 // steffygm - bookmark
+
+   // default bypass
    bool bypassL1D = false;
    if ( CACHE_GLOBAL == inst.cache_op || (m_L1D == NULL) ) {
        bypassL1D = true;
@@ -1399,11 +1407,15 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
        if (m_core->get_config()->gmem_skip_L1D)
            bypassL1D = true;
    }
+
+   // process the mem access if default bypass is not happening
    if( !bypassL1D )
    {
        assert( CACHE_UNDEFINED != inst.cache_op );
-       stall_cond = process_memory_access_queue(m_L1D,inst);
+       stall_cond = process_memory_access_queue(m_L1D,inst); // returns stall_cond or bypass
    }
+
+   // if default bypass or is new (dynamic) bypass
    if( bypassL1D || stall_cond == BYPASS_L1D) {
        // bypass L1 cache
        unsigned control_size = inst.is_store() ? WRITE_PACKET_SIZE : READ_PACKET_SIZE;

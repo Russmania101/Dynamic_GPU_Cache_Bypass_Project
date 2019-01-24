@@ -156,7 +156,11 @@ void tag_store::init( int core_id, int type_id )
     m_type_id = type_id;
 }
 
-// steffygm - tag_store->probe
+// probe the tag store to see if entry exists or not
+// - addr parameter = block address
+// - returns HIT (in TS), MISS (not in TS)
+// - also updates the "idx" parameter to point to the index of where the new TS entry
+//   will go if it was a MISS
 enum cache_request_status tag_store::probe( new_addr_type addr, unsigned &idx ) const {
     //assert( m_config.m_write_policy == READ_ONLY );
     unsigned set_index = m_config.set_index(addr);
@@ -166,53 +170,53 @@ enum cache_request_status tag_store::probe( new_addr_type addr, unsigned &idx ) 
     unsigned valid_line = (unsigned)-1;
     unsigned min_RC = (unsigned)-1;
 
-    bool all_reserved = true;
-
-    // check for hit or pending hit
+    // check for hit
     // TODO - hardcode 2* way of l1d
     for (unsigned way=0; way<2*m_config.m_assoc; way++) {
         unsigned index = set_index*(2*m_config.m_assoc)+way;
         tag_block_t *line = &m_lines[index];
         if (line->m_tag == tag) {
-            if ( line->m_status == RESERVED ) { //allocated but no position
-                idx = index;
-                return HIT_RESERVED;
-            } else if ( line->m_status == VALID ) { // position is there and in data_store
+            if ( line->m_status == VALID )
+            { // in tag store
                 idx = index;
                 return HIT;
-            } else { // INVALID (not allocated)
+            }
+            else
+            { // not in tag store
                 assert( line->m_status == INVALID );
             }
         }
-        if (line->m_status != RESERVED)
+
+        // find index of where to put new tag entry if there was not a hit
+        if (line->m_status == INVALID)
         {
-            all_reserved = false;
-            if (line->m_status == INVALID)
+            // if found free line
+            invalid_line = index;
+        }
+        else
+        {   // uses LFU (least frequently used) for eviction/replacement
+        		if ( line->m_RC < min_RC )
             {
-                // if found free line
-                invalid_line = index;
-            } else { // if no free lines, then find the best candidate to remove
-                // valid line : keep track of most appropriate replacement candidate
-            		// if (LFU)
-            		if ( line->m_RC < min_RC )
-                {
-            			min_RC = line->m_RC;
-                  valid_line = index;
-                }
-            		// TODO - put LFU in config file
+        			min_RC = line->m_RC;
+              valid_line = index;
             }
         }
     }
-    if ( all_reserved ) {
-        assert( m_config.m_alloc_policy == ON_MISS );
-        return RESERVATION_FAIL; // miss and not enough space in cache to allocate on miss
-    }
 
-    if ( invalid_line != (unsigned)-1 ) {
+    // if free line
+    if ( invalid_line != (unsigned)-1 )
+    {
         idx = invalid_line;
-    } else if ( valid_line != (unsigned)-1) {
+    }
+    // if no free line, evict
+    else if ( valid_line != (unsigned)-1)
+    {
         idx = valid_line;
-    } else abort(); // if an unreserved block exists, it is either invalid or replaceable
+    }
+    else
+    {
+      abort(); // if an unreserved block exists, it is either invalid or replaceable
+    }
 
     return MISS;
 }
@@ -1209,26 +1213,34 @@ data_cache::access( new_addr_type addr,
     return access_status;
 }
 
+// return HIT = in DS, MISS = need to allocate in DS, BYPASS = bypass l1,
+// xxxxxxxxxxxxxxxxx HIT_RESERVED = waiting for DS to get filled
 enum cache_request_status l1_cache::process_tag_store_probe(enum cache_request_status status,
                                                             new_addr_type block_addr,
-                                                            unsigned cache_index)
+                                                            unsigned tag_index)
 {
   new_addr_type tag = m_config.tag(block_addr);
+
   if(status == HIT)
   {
-    enum tag_block_position_status block_pos_status = m_tag_store->get_tag_block_position(cache_index);
-    if(block_pos_status==T_VALID)
+    enum tag_block_position_status block_pos_status = m_tag_store->get_tag_block_position(tag_index);
+    if(block_pos_status==T_VALID) // in DS
     {
-      m_tag_store->inc_tag_block_rc(cache_index);
+      m_tag_store->inc_tag_block_rc(tag_index);
       return HIT;
     }
-    else // pos is invalid
+    /*else if (block_pos_status==T_RESERVED) // on its way to DS
     {
-      unsigned rc = m_tag_store->inc_tag_block_rc(cache_index);
+      return BYPASS;
+    }*/
+    else // pos is invalid - not in DS
+    {
+      unsigned rc = m_tag_store->inc_tag_block_rc(tag_index);
       // TODO move threshold to config FILE
       if(rc > 2)
       {
-        //TODO dynamic aging
+        // reserve the position - the DS entry is on its way to being filled
+        //m_tag_store->reserve_tag_block_position(tag_index);
         return MISS;
       }
       else
@@ -1240,10 +1252,11 @@ enum cache_request_status l1_cache::process_tag_store_probe(enum cache_request_s
   else if(status == MISS)
   {
     //alloc new tag_store entry
-    m_tag_store->allocate_new_entry(tag, cache_index);
+    m_tag_store->allocate_new_entry(tag, tag_index);
     //bypass
     return BYPASS;
   }
+
   return status;
 }
 
@@ -1293,14 +1306,14 @@ l1_cache::process_tag_probe( bool wr,
 
     if (probe_status == MISS)
     {
-
-
         // if eviction, set evicted entry in tag store to pos=invalid, RC=0, etc...
         cache_block_t &replace_evict_block = m_tag_array->get_block(cache_index);
         new_addr_type replace_evict_addr = replace_evict_block.m_block_addr;
+
         if(possible_evict_addr != replace_evict_addr) //evicted
         {
           new_addr_type set_e_index = m_config.set_index(possible_evict_addr);
+          // TODO add double size to config
           for (unsigned t_way=0; t_way<(2*m_config.m_assoc); t_way++) {
               unsigned t_index = set_e_index*(2*m_config.m_assoc)+t_way;
               tag_block_t &t_line = m_tag_store->get_block(t_index);
@@ -1319,9 +1332,9 @@ l1_cache::process_tag_probe( bool wr,
         new_addr_type block_addr = m_config.block_addr(addr);
         new_addr_type new_tag   = m_config.tag(block_addr);
         tag_block_t &new_tag_line = m_tag_store->get_block(tag_index);
-        new_tag_line.fill();
+        new_tag_line.fill(); // valid pos in TS
 
-        //        Dynamic Aging
+        // Dynamic Aging
         new_addr_type set_index = m_config.set_index(block_addr);
         for (unsigned d_way=0; d_way<m_config.m_assoc; d_way++) {
             unsigned d_index = set_index*m_config.m_assoc+d_way;
@@ -1351,20 +1364,24 @@ l1_cache::process_tag_probe( bool wr,
 /// It is write-evict (global) or write-back (local) at the
 /// granularity of individual blocks (Set by GPGPU-Sim configuration file)
 /// (the policy used in fermi according to the CUDA manual)
-enum cache_request_status
-l1_cache::access( new_addr_type addr,
-                  mem_fetch *mf,
-                  unsigned time,
-                  std::list<cache_event> &events )
+
+// this overwrites the data_cache::access() function and is specifically
+// for the L1 cache
+enum cache_request_status l1_cache::access( new_addr_type addr,
+                                            mem_fetch *mf,
+                                            unsigned time,
+                                            std::list<cache_event> &events )
 {
+    // init
     assert( mf->get_data_size() <= m_config.get_line_sz());
     bool wr = mf->get_is_write();
     new_addr_type block_addr = m_config.block_addr(addr);
     unsigned tag_index = (unsigned) -1;
     unsigned cache_index = (unsigned)-1;
 
-    // returns hit/miss and tells where data is or where to put it (cache_index)
+    // returns hit/miss and tells where data is or where to put it (tag_index)
     enum cache_request_status tag_probe_status = m_tag_store->probe( block_addr, tag_index );
+
     // returns hit, miss, or bypass
     enum cache_request_status tag_probe_processed_status = process_tag_store_probe(tag_probe_status, block_addr, tag_index);
 
@@ -1379,9 +1396,8 @@ l1_cache::access( new_addr_type addr,
     enum cache_request_status cache_probe_status  = m_tag_array->probe( block_addr, cache_index ); // make probe tagstore isntead of array
 
     // this calls the l1_cache version
-    enum cache_request_status access_status = process_tag_probe( wr, tag_probe_processed_status, addr, tag_index, cache_index, mf, time, events );
-    m_stats.inc_stats(mf->get_access_type(),
-        m_stats.select_stats_status(tag_probe_processed_status, access_status));
+    enum cache_request_status access_status = process_tag_probe( wr, cache_probe_status, addr, tag_index, cache_index, mf, time, events );
+    m_stats.inc_stats(mf->get_access_type(), m_stats.select_stats_status(cache_probe_status, access_status));
     return access_status;
 }
 // TODO - if bug with member variabes m_config and/or m_tag_array might have to look into structure

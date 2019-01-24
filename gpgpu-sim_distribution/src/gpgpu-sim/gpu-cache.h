@@ -66,7 +66,8 @@ const char * cache_request_status_str(enum cache_request_status status);
 enum tag_block_position_status
 {
     T_INVALID = 0,
-    T_VALID
+    T_VALID,
+    T_RESERVED
 };
 
 struct tag_block_t {
@@ -82,18 +83,21 @@ struct tag_block_t {
         m_RC=0;
 	      m_pos=T_INVALID;
 	      m_tag=tag;
-        m_status=RESERVED;
+        m_status=VALID;
     }
     void fill()
     {
       m_pos=T_VALID;
-      m_status=VALID;
+    }
+    void reserve_pos()
+    {
+      m_pos=T_RESERVED;
     }
 
-    new_addr_type    m_tag;
-    tag_block_position_status   m_pos; //NOTE may not be new_addr_type
-    unsigned         m_RC;
-    cache_block_state    m_status;
+    new_addr_type               m_tag;
+    tag_block_position_status   m_pos; // in the DS (Valid = in, RESERVED = on way, INVALID = not in)
+    unsigned                    m_RC;
+    cache_block_state           m_status; // in the TS or not
 };
 
 //steffygm - cache_block_t struct
@@ -380,29 +384,33 @@ public:
     ~tag_store();
 
     enum cache_request_status probe( new_addr_type addr, unsigned &idx ) const;
-    void allocate_new_entry(new_addr_type tag, unsigned cache_index);
-    enum tag_block_position_status get_tag_block_position(unsigned cache_index);
-    void update_tag_block_position(enum tag_block_position_status new_position_status, unsigned cache_index);
-    unsigned get_tag_block_rc(unsigned cache_index)
+    void allocate_new_entry(new_addr_type tag, unsigned tag_index);
+    void reserve_tag_block_position(unsigned tag_index)
     {
-      return m_lines[cache_index].m_RC;
+      m_lines[tag_index].m_pos = T_RESERVED;
     }
-    unsigned inc_tag_block_rc(unsigned cache_index)
+    enum tag_block_position_status get_tag_block_position(unsigned tag_index);
+    void update_tag_block_position(enum tag_block_position_status new_position_status, unsigned tag_index);
+    unsigned get_tag_block_rc(unsigned tag_index)
+    {
+      return m_lines[tag_index].m_RC;
+    }
+    unsigned inc_tag_block_rc(unsigned tag_index)
     {
       //TODO russell doubts that this works
-      if(m_lines[cache_index].m_RC < ((unsigned) -1))
+      if(m_lines[tag_index].m_RC < ((unsigned) -1))
       {
-        m_lines[cache_index].m_RC++;
+        m_lines[tag_index].m_RC++;
       }
-      return m_lines[cache_index].m_RC;
+      return m_lines[tag_index].m_RC;
     }
-    unsigned dec_tag_block_rc(unsigned cache_index)
+    unsigned dec_tag_block_rc(unsigned tag_index)
     {
-      if(m_lines[cache_index].m_RC > 0)
+      if(m_lines[tag_index].m_RC > 0)
       {
-        m_lines[cache_index].m_RC--;
+        m_lines[tag_index].m_RC--;
       }
-      return m_lines[cache_index].m_RC;
+      return m_lines[tag_index].m_RC;
     }
     //enum cache_request_status access( new_addr_type addr, unsigned time, unsigned &idx );
     //enum cache_request_status access( new_addr_type addr, unsigned time, unsigned &idx, bool &wb, cache_block_t &evicted );
