@@ -1260,6 +1260,65 @@ enum cache_request_status l1_cache::process_tag_store_probe(enum cache_request_s
   return status;
 }
 
+enum cache_request_status l1_cache::peek_tag_store_probe(enum cache_request_status status,
+                                                            new_addr_type block_addr,
+                                                            unsigned tag_index)
+{
+  new_addr_type tag = m_config.tag(block_addr);
+
+  if(status == HIT)
+  {
+    enum tag_block_position_status block_pos_status = m_tag_store->get_tag_block_position(tag_index);
+    if(block_pos_status==T_VALID) // in DS
+    {
+      //m_tag_store->inc_tag_block_rc(tag_index);
+      return HIT;
+    }
+    /*else if (block_pos_status==T_RESERVED) // on its way to DS
+    {
+      return BYPASS;
+    }*/
+    else // pos is invalid - not in DS
+    {
+      unsigned rc = m_tag_store->get_tag_block_rc(tag_index);//m_tag_store->inc_tag_block_rc(tag_index);
+      // TODO move threshold to config FILE
+      if(rc >= 2)
+      {
+        // reserve the position - the DS entry is on its way to being filled
+        //m_tag_store->reserve_tag_block_position(tag_index);
+        return MISS;
+      }
+      else
+      {
+        return BYPASS;
+      }
+    }
+  }
+  else if(status == MISS)
+  {
+    //alloc new tag_store entry
+    //m_tag_store->allocate_new_entry(tag, tag_index);
+    //bypass
+    return BYPASS;
+  }
+
+  return status;
+}
+
+bool l1_cache::is_bypass(new_addr_type addr)
+{
+  unsigned tag_index = (unsigned) -1;
+  new_addr_type block_addr = m_config.block_addr(addr);
+
+  enum cache_request_status tag_probe_status = m_tag_store->probe(block_addr, tag_index);
+
+  enum cache_request_status tag_probe_processed_status = peek_tag_store_probe(tag_probe_status, block_addr, tag_index);
+
+
+
+  return (tag_probe_processed_status==BYPASS);
+}
+
 
 enum cache_request_status
 l1_cache::process_tag_probe( bool wr,

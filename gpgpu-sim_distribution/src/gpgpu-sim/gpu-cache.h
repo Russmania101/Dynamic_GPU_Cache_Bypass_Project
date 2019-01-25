@@ -49,8 +49,8 @@ enum cache_request_status {
     HIT_RESERVED,
     MISS,
     RESERVATION_FAIL,
-    BYPASS,
-    NUM_CACHE_REQUEST_STATUS
+    NUM_CACHE_REQUEST_STATUS,
+    BYPASS
 };
 
 enum cache_event {
@@ -1085,6 +1085,12 @@ public:
     enum cache_request_status process_tag_store_probe(enum cache_request_status status,
                                                       new_addr_type block_addr,
                                                       unsigned cache_index);
+
+    enum cache_request_status peek_tag_store_probe(enum cache_request_status status,
+                                                   new_addr_type block_addr,
+                                                   unsigned tag_index);
+
+    bool is_bypass(new_addr_type addr);
 
 protected:
     l1_cache( const char *name,

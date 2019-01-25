@@ -1848,7 +1848,21 @@ void ldst_unit::cycle()
                    if (m_core->get_config()->gmem_skip_L1D)
                        bypassL1D = true;
                }
-               if( bypassL1D ) {
+
+               //std::list<mem_access_t> accessq = mf->get_inst().m_accessq;
+
+              bool is_bypass = false;
+
+               /*warp_inst_t &inst = mf->get_inst_no_const();
+               //mem_fetch *mf2 = m_mf_allocator->alloc(inst,inst.accessq_back());
+               if (!inst.accessq_empty())
+               {
+                 mem_access_t access = inst.accessq_back();
+                 new_addr_type addr_test = access.get_addr();
+                 is_bypass = m_L1D->is_bypass(addr_test);
+               }*/
+
+               if( bypassL1D || is_bypass) {
                    if ( m_next_global == NULL ) {
                        mf->set_status(IN_SHADER_FETCHED,gpu_sim_cycle+gpu_tot_sim_cycle);
                        m_response_fifo.pop_front();
