@@ -44,7 +44,7 @@ enum tlb_request_status {
 	TLB_PENDING
 };
 enum mem_stage_stall_type {
-   NO_RC_FAIL = 0, 
+   NO_RC_FAIL = 0,
    BK_CONF,
    MSHR_RC_FAIL,
    ICNT_RC_FAIL,
@@ -53,8 +53,8 @@ enum mem_stage_stall_type {
    DATA_PORT_STALL,
    WB_ICNT_RC_FAIL,
    WB_CACHE_RSRV_FAIL,
-   BYPASS_L1D,
-   N_MEM_STAGE_STALL_TYPE
+   N_MEM_STAGE_STALL_TYPE,
+   BYPASS_L1D
 };
 
 

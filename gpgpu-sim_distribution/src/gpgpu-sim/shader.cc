@@ -27,6 +27,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <float.h>
+#include <iostream>
 #include "shader.h"
 #include "gpu-sim.h"
 #include "addrdec.h"
@@ -1315,6 +1316,9 @@ ldst_unit::process_cache_access( cache_t* cache,
         assert( !read_sent );
         assert( !write_sent );
         delete mf;
+    } else if (status == BYPASS) {
+        assert( status == BYPASS);
+        return BYPASS_L1D;
     } else {
         assert( status == MISS || status == HIT_RESERVED );
         //inst.clear_active( access.get_warp_mask() ); // threads in mf writeback when mf returns
@@ -1344,10 +1348,10 @@ mem_stage_stall_type ldst_unit::process_memory_access_queue( cache_t *cache, war
     enum cache_request_status status = cache->access(mf->get_addr(),mf,gpu_sim_cycle+gpu_tot_sim_cycle,events);
 
     // if the cache access() returns bypass, then return the BYPASS stall_cond
-    if(status == BYPASS)
+    /*if(status == BYPASS)
     {
       return BYPASS_L1D;
-    }
+    }*/
 
 
     return process_cache_access( cache, mf->get_addr(), inst, events, mf, status );
@@ -1408,8 +1412,12 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
            bypassL1D = true;
    }
 
+   mem_fetch *mf2 = m_mf_allocator->alloc(inst,inst.accessq_back());
+   printf("inst addr @ memory_cycle(): addr=%llu, warp_id=%u\n", mf2->get_addr(), inst.warp_id());
+   delete(mf2);
+
    // process the mem access if default bypass is not happening
-   if( !bypassL1D )
+   if( !bypassL1D)
    {
        assert( CACHE_UNDEFINED != inst.cache_op );
        stall_cond = process_memory_access_queue(m_L1D,inst); // returns stall_cond or bypass
@@ -1758,6 +1766,7 @@ void ldst_unit::writeback()
             break;
         case 3: // global/local
             if( m_next_global ) {
+                printf("writeback() - m_next_global=%llu\n", m_next_global->get_addr());
                 m_next_wb = m_next_global->get_inst();
                 if( m_next_global->isatomic() )
                     m_core->decrement_atomic_count(m_next_global->get_wid(),m_next_global->get_access_warp_mask().count());
@@ -1851,22 +1860,30 @@ void ldst_unit::cycle()
 
                //std::list<mem_access_t> accessq = mf->get_inst().m_accessq;
 
-              bool is_bypass = false;
+               bool is_bypass = false;
+
+               /*warp_inst_t &inst = mf->get_inst_no_const();
+               mem_fetch *mf2 = m_mf_allocator->alloc(inst,inst.accessq_back());
+               printf("inst addr @ cycle(): mf1=%llu, mf2=%llu, warp_id: %u\n", mf->get_addr(), mf2->get_addr(), inst.warp_id());
+               delete(mf2);*/
 
                /*warp_inst_t &inst = mf->get_inst_no_const();
                //mem_fetch *mf2 = m_mf_allocator->alloc(inst,inst.accessq_back());
                if (!inst.accessq_empty())
                {
                  mem_access_t access = inst.accessq_back();
-                 new_addr_type addr_test = access.get_addr();
-                 is_bypass = m_L1D->is_bypass(addr_test);
-               }*/
+                 new_addr_type addr_test = access.get_addr();*/
 
+               is_bypass = m_L1D->is_bypass(mf->get_addr());
+               printf("cycle() - mf=%llu, warp_id=%u, status=%s\n", mf->get_addr(), (mf->get_inst()).warp_id(), is_bypass ? "bypass" : "not_bypass");
+
+               //is_bypass = true;
                if( bypassL1D || is_bypass) {
-                   if ( m_next_global == NULL ) {
+                   if ( m_next_global == NULL) {
                        mf->set_status(IN_SHADER_FETCHED,gpu_sim_cycle+gpu_tot_sim_cycle);
                        m_response_fifo.pop_front();
                        m_next_global = mf;
+                       printf("cycle() - m_next_global=%llu\n", m_next_global->get_addr());
                    }
                } else {
                    if (m_L1D->fill_port_free()) {
@@ -1874,6 +1891,11 @@ void ldst_unit::cycle()
                        m_response_fifo.pop_front();
                    }
                }
+
+               /*if (is_bypass)
+               {
+
+               }*/
            }
        }
    }

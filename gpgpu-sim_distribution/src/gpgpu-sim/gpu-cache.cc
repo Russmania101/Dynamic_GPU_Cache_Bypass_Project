@@ -1220,13 +1220,16 @@ enum cache_request_status l1_cache::process_tag_store_probe(enum cache_request_s
                                                             unsigned tag_index)
 {
   new_addr_type tag = m_config.tag(block_addr);
+  printf("process_tag_store_probe() - tag=%llu, tag_index=%u\n", tag, tag_index);
 
   if(status == HIT)
   {
+    printf("process_tag_store_probe() - tag_store HIT\n");
     enum tag_block_position_status block_pos_status = m_tag_store->get_tag_block_position(tag_index);
     if(block_pos_status==T_VALID) // in DS
     {
-      m_tag_store->inc_tag_block_rc(tag_index);
+      unsigned rc = m_tag_store->inc_tag_block_rc(tag_index);
+      printf("process_tag_store_probe() - return HIT for DS, RC_after_inc=%d\n", rc);
       return HIT;
     }
     /*else if (block_pos_status==T_RESERVED) // on its way to DS
@@ -1236,23 +1239,29 @@ enum cache_request_status l1_cache::process_tag_store_probe(enum cache_request_s
     else // pos is invalid - not in DS
     {
       unsigned rc = m_tag_store->inc_tag_block_rc(tag_index);
+      printf("process_tag_store_probe() - INVALID POSITION, RC_after_inc=%d\n", rc);
       // TODO move threshold to config FILE
       if(rc > 2)
       {
+        printf("process_tag_store_probe() - return MISS for DS, RC > 2\n");
         // reserve the position - the DS entry is on its way to being filled
         //m_tag_store->reserve_tag_block_position(tag_index);
         return MISS;
       }
       else
       {
+        printf("process_tag_store_probe() - return BYPASS for DS, RC <= 2\n");
         return BYPASS;
       }
     }
   }
   else if(status == MISS)
   {
+    printf("process_tag_store_probe() - tag_store MISS\n");
     //alloc new tag_store entry
     m_tag_store->allocate_new_entry(tag, tag_index);
+    printf("process_tag_store_probe() - allocated new tag_store entry\n");
+    printf("process_tag_store_probe() - return BYPASS for DS\n");
     //bypass
     return BYPASS;
   }
@@ -1265,13 +1274,16 @@ enum cache_request_status l1_cache::peek_tag_store_probe(enum cache_request_stat
                                                             unsigned tag_index)
 {
   new_addr_type tag = m_config.tag(block_addr);
+  printf("peek() - tag=%llu, tag_index=%d\n", tag, tag_index);
 
   if(status == HIT)
   {
+    printf("peek() - TS hit\n");
     enum tag_block_position_status block_pos_status = m_tag_store->get_tag_block_position(tag_index);
     if(block_pos_status==T_VALID) // in DS
     {
       //m_tag_store->inc_tag_block_rc(tag_index);
+      printf("peek() - return HIT for DS\n");
       return HIT;
     }
     /*else if (block_pos_status==T_RESERVED) // on its way to DS
@@ -1280,16 +1292,19 @@ enum cache_request_status l1_cache::peek_tag_store_probe(enum cache_request_stat
     }*/
     else // pos is invalid - not in DS
     {
+      printf("peek() - invalid position\n");
       unsigned rc = m_tag_store->get_tag_block_rc(tag_index);//m_tag_store->inc_tag_block_rc(tag_index);
       // TODO move threshold to config FILE
-      if(rc >= 2)
+      if(rc > 2)
       {
         // reserve the position - the DS entry is on its way to being filled
         //m_tag_store->reserve_tag_block_position(tag_index);
+        printf("peek() - return MISS for DS\n");
         return MISS;
       }
       else
       {
+        printf("peek() - return BYPASS for DS\n");
         return BYPASS;
       }
     }
@@ -1299,6 +1314,7 @@ enum cache_request_status l1_cache::peek_tag_store_probe(enum cache_request_stat
     //alloc new tag_store entry
     //m_tag_store->allocate_new_entry(tag, tag_index);
     //bypass
+    printf("peek() - TS miss, return BYPASS for DS\n");
     return BYPASS;
   }
 
@@ -1369,7 +1385,8 @@ l1_cache::process_tag_probe( bool wr,
         cache_block_t &replace_evict_block = m_tag_array->get_block(cache_index);
         new_addr_type replace_evict_addr = replace_evict_block.m_block_addr;
 
-        if(possible_evict_addr != replace_evict_addr) //evicted
+        printf("process_tag_probe() - possible_evict=%llu, replace_evict=%llu, replace?=%s\n", possible_evict_addr, replace_evict_addr, (possible_evict_addr != replace_evict_addr) ? "true" : "false");
+        if(possible_evict_addr != replace_evict_addr && possible_evict_addr != 0) //evicted
         {
           new_addr_type set_e_index = m_config.set_index(possible_evict_addr);
           // TODO add double size to config
@@ -1444,6 +1461,7 @@ enum cache_request_status l1_cache::access( new_addr_type addr,
     // returns hit, miss, or bypass
     enum cache_request_status tag_probe_processed_status = process_tag_store_probe(tag_probe_status, block_addr, tag_index);
 
+    //printf("inst addr @ memory_cycle(): addr=%llu, warp_id=%u, bypass=%s\n", mf->get_addr(), (mf->get_inst_no_const()).warp_id(), tag_probe_processed_status==BYPASS ? "bypass" : "not_bypass");
 
     if (tag_probe_processed_status == BYPASS)
     {
