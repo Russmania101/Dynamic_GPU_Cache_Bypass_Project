@@ -38,7 +38,7 @@ ar rcs  /home/gpgpu-sim/Documents/Dynamic_GPU_Cache_Bypass_Project/gpgpu-sim_dis
 make[1]: Leaving directory `/home/gpgpu-sim/Documents/Dynamic_GPU_Cache_Bypass_Project/gpgpu-sim_distribution/src/gpgpu-sim'
 make "CREATE_LIBRARY=1" "DEBUG=0" -C ./src/intersim2
 make[1]: Entering directory `/home/gpgpu-sim/Documents/Dynamic_GPU_Cache_Bypass_Project/gpgpu-sim_distribution/src/intersim2'
-gcc -Wall -I. -Iarbiters -Iallocators -Irouters -Inetworks -Ipower -I/home/gpgpu-sim/gpgpu-sim_distribution/src/gpgpu-sim/  -DCREATE_LIBRARY -O3 -g -fPIC -c lex.yy.c -o /home/gpgpu-sim/Documents/Dynamic_GPU_Cache_Bypass_Project/gpgpu-sim_distribution/build/gcc-4.6.4/cuda-4020/release/intersim2/lex.yy.o
+g++ -Wall -I. -Iarbiters -Iallocators -Irouters -Inetworks -Ipower -I/home/gpgpu-sim/gpgpu-sim_distribution/src/gpgpu-sim/  -DCREATE_LIBRARY -O3 -g -fPIC -c interconnect_interface.cpp -o /home/gpgpu-sim/Documents/Dynamic_GPU_Cache_Bypass_Project/gpgpu-sim_distribution/build/gcc-4.6.4/cuda-4020/release/intersim2/interconnect_interface.o
 make[1]: Leaving directory `/home/gpgpu-sim/Documents/Dynamic_GPU_Cache_Bypass_Project/gpgpu-sim_distribution/src/intersim2'
 make -C ./src/ depend
 make[1]: Entering directory `/home/gpgpu-sim/Documents/Dynamic_GPU_Cache_Bypass_Project/gpgpu-sim_distribution/src'

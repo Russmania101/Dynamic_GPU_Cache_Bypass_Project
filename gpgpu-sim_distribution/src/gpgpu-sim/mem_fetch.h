@@ -49,18 +49,18 @@ enum mf_type {
 
 class mem_fetch {
 public:
-    mem_fetch( const mem_access_t &access, 
+    mem_fetch( const mem_access_t &access,
                const warp_inst_t *inst,
-               unsigned ctrl_size, 
+               unsigned ctrl_size,
                unsigned wid,
-               unsigned sid, 
-               unsigned tpc, 
+               unsigned sid,
+               unsigned tpc,
                const class memory_config *config );
    ~mem_fetch();
 
    void set_status( enum mem_fetch_status status, unsigned long long cycle );
-   void set_reply() 
-   { 
+   void set_reply()
+   {
        assert( m_access.get_type() != L1_WRBK_ACC && m_access.get_type() != L2_WRBK_ACC );
        if( m_type==READ_REQUEST ) {
            assert( !get_is_write() );
@@ -111,6 +111,19 @@ public:
    const memory_config *get_mem_config(){return m_mem_config;}
 
    unsigned get_num_flits(bool simt_to_mem);
+
+     // Tag Store Things
+     void set_tag_store_probe_status(unsigned status) { m_tag_store_probe_status = status; }
+     unsigned get_tag_store_probe_status() const { return m_tag_store_probe_status; }
+     void set_is_l1_op(bool is_l1_op) { m_is_l1_op = is_l1_op; }
+     bool get_is_l1_op() const { return m_is_l1_op; }
+     void set_tag_store_index(unsigned TS_index) { m_tag_store_index = TS_index; }
+     unsigned get_tag_store_index() const { return m_tag_store_index; }
+     // l1 d_cache tag store m_status
+     bool m_is_l1_op;
+     unsigned m_tag_store_probe_status;
+     unsigned m_tag_store_index;
+
 private:
    // request source information
    unsigned m_request_uid;

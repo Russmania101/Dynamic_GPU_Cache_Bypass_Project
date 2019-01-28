@@ -33,17 +33,17 @@
 
 unsigned mem_fetch::sm_next_mf_request_uid=1;
 
-mem_fetch::mem_fetch( const mem_access_t &access, 
+mem_fetch::mem_fetch( const mem_access_t &access,
                       const warp_inst_t *inst,
-                      unsigned ctrl_size, 
+                      unsigned ctrl_size,
                       unsigned wid,
-                      unsigned sid, 
-                      unsigned tpc, 
+                      unsigned sid,
+                      unsigned tpc,
                       const class memory_config *config )
 {
    m_request_uid = sm_next_mf_request_uid++;
    m_access = access;
-   if( inst ) { 
+   if( inst ) {
        m_inst = *inst;
        assert( wid == m_inst.warp_id() );
    }
@@ -61,6 +61,11 @@ mem_fetch::mem_fetch( const mem_access_t &access,
    m_status_change = gpu_sim_cycle + gpu_tot_sim_cycle;
    m_mem_config = config;
    icnt_flit_size = config->icnt_flit_size;
+
+   // TS initialize
+   m_is_l1_op = false;
+   m_tag_store_probe_status = (unsigned) -1;
+   m_tag_store_index = (unsigned) -1;
 }
 
 mem_fetch::~mem_fetch()
@@ -84,7 +89,7 @@ void mem_fetch::print( FILE *fp, bool print_inst ) const
     }
     fprintf(fp,"  mf: uid=%6u, sid%02u:w%02u, part=%u, ", m_request_uid, m_sid, m_wid, m_raw_addr.chip );
     m_access.print(fp);
-    if( (unsigned)m_status < NUM_MEM_REQ_STAT ) 
+    if( (unsigned)m_status < NUM_MEM_REQ_STAT )
        fprintf(fp," status = %s (%llu), ", Status_str[m_status], m_status_change );
     else
        fprintf(fp," status = %u??? (%llu), ", m_status, m_status_change );
@@ -92,7 +97,7 @@ void mem_fetch::print( FILE *fp, bool print_inst ) const
     else fprintf(fp,"\n");
 }
 
-void mem_fetch::set_status( enum mem_fetch_status status, unsigned long long cycle ) 
+void mem_fetch::set_status( enum mem_fetch_status status, unsigned long long cycle )
 {
     m_status = status;
     m_status_change = cycle;
@@ -116,7 +121,7 @@ bool mem_fetch::istexture() const
 }
 
 bool mem_fetch::isconst() const
-{ 
+{
     if( m_inst.empty() ) return false;
     return (m_inst.space.get_type() == const_space) || (m_inst.space.get_type() == param_space_kernel);
 }
@@ -132,6 +137,3 @@ unsigned mem_fetch::get_num_flits(bool simt_to_mem){
 
 	return (sz/icnt_flit_size) + ( (sz % icnt_flit_size)? 1:0);
 }
-
-
-

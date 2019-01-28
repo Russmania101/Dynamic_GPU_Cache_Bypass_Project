@@ -1423,22 +1423,43 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
    {
        tag_store_request_status probe_status = l1d_tag_store->probe(mf->get_addr(), tag_index);
        tag_store_request_status processed_probe_status = m_L1D->process_tag_store_probe(probe_status, mf->get_addr(), tag_index);
-
+       mf->set_is_l1_op(true);
+       mf->set_tag_store_probe_status(processed_probe_status);
+       mf->set_tag_store_index(tag_index);
        switch (processed_probe_status)
        {
          case T_HIT:
          {
            //go to cache
+           printf("processed tsrs=HIT\n");
            break;
          }
          case T_MISS:
          {
            //go to cache
+           printf("processed tsrs=MISS\n");
+           break;
+         }
+         case T_FIRST_BYPASS:
+         {
+           // allocated new entry in TS
+
+           printf("processed tsrs=FIRST_BYPASS\n");
+           bypassL1D = true;
            break;
          }
          case T_BYPASS:
          {
            //printf("ldst_unit::memory_cycle() - BYPASS mf_block_addr=%llu\n", m_L1D->get_block_addr(mf->get_addr()));
+           printf("processed tsrs=BYPASS\n");
+           bypassL1D = true;
+           break;
+         }
+         case T_RESERVATION_FAIL:
+         {
+           // should never return this at this stage, but should bypass if this is the tag store response
+
+           printf("processed tsrs=RESERVATION_FAIL\n");
            bypassL1D = true;
            break;
          }
@@ -1446,6 +1467,10 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
          {
            printf("Error? - memory cycle tag_store probe with T_NO_TS_ENTRY\n");
            break;
+         }
+         default:
+         {
+           printf("processed tsrs= (?) %d\n", processed_probe_status);
          }
        }
     }
@@ -1895,13 +1920,21 @@ void ldst_unit::cycle()
                        bypassL1D = true;
                }
 
-               // Peek the ts to see what type it was (sent to bypass) or m_L1D fill
-               printf("ldst_unit::cycle() - mf=%p\n", mf);
-               tag_store_request_status peek_result = m_L1D->peek_tag_store(mf->get_addr());
-               printf("peek result - %d\n", peek_result);
-               if(peek_result==2)
+
+               if(mf->get_is_l1_op())
                {
-                 bypassL1D=true;
+                 tag_store_request_status mf_TS_status = (tag_store_request_status) mf->get_tag_store_probe_status();
+                 unsigned mf_TS_index = mf->get_tag_store_index();
+                 if(mf_TS_status == T_FIRST_BYPASS)
+                 {
+                   // fill TS m_status
+                   m_L1D->fill_tag_store_block_status(mf_TS_index);
+                   bypassL1D = true;
+                 }
+                 else if(mf_TS_status == T_BYPASS)
+                 {
+                   bypassL1D = true;
+                 }
                }
                if( bypassL1D ) {
                    //printf("ldst_unit::cycle() - mf_status=%d bypass\n", mf->get_status());

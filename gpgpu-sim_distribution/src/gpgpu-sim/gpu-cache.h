@@ -54,7 +54,9 @@ enum cache_request_status {
 
 enum tag_store_request_status {
       T_HIT = 0,
+      T_RESERVATION_FAIL,
       T_MISS,
+      T_FIRST_BYPASS,
       T_BYPASS,
       T_NO_TS_ENTRY
 };
@@ -89,11 +91,15 @@ struct tag_block_t {
         m_RC=0;
 	      m_pos=T_INVALID;
 	      m_tag=tag;
-        m_status=VALID;
+        m_status=RESERVED;
     }
     void fill()
     {
       m_pos=T_VALID;
+    }
+    void fill_status()
+    {
+      m_status=VALID;
     }
     void reserve_pos()
     {
@@ -396,6 +402,10 @@ public:
     }
     enum tag_block_position_status get_tag_block_position(unsigned tag_index);
     void update_tag_block_position(enum tag_block_position_status new_position_status, unsigned tag_index);
+    void fill_tag_block_status(unsigned tag_index)
+    {
+      m_lines[tag_index].fill_status();
+    }
     unsigned get_tag_block_rc(unsigned tag_index)
     {
       return m_lines[tag_index].m_RC;
@@ -1088,7 +1098,10 @@ public:
                 unsigned time,
                 std::list<cache_event> &events );
     void fill(mem_fetch *mf, unsigned time);
-
+    void fill_tag_store_block_status(unsigned tag_index)
+    {
+      m_tag_store->fill_tag_block_status(tag_index);
+    }
     enum tag_store_request_status process_tag_store_probe(enum tag_store_request_status status,
                                                   new_addr_type addr,
                                                   unsigned tag_index);

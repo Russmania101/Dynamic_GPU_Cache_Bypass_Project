@@ -168,11 +168,11 @@ enum tag_store_request_status tag_store::probe( new_addr_type addr, unsigned &id
     new_addr_type block_addr = m_config.block_addr(addr);
     unsigned set_index = m_config.set_index(block_addr);
     new_addr_type tag = m_config.tag(block_addr);
-    printf("TAG STORE PROBE\n\taddr=%llu\n\tblock_addr=%llu\n\ttag=%u", addr, block_addr, tag);
+    printf("TAG STORE PROBE\n\taddr=%llu\n\tblock_addr=%llu\n\ttag=%llu", addr, block_addr, tag);
     unsigned invalid_line = (unsigned)-1;
     unsigned valid_line = (unsigned)-1;
     unsigned min_RC = (unsigned)-1;
-
+    bool all_reserved = true;
     // check for hit
     // TODO - hardcode 2* way of l1d
     for (unsigned way=0; way<2*m_config.m_assoc; way++) {
@@ -190,25 +190,33 @@ enum tag_store_request_status tag_store::probe( new_addr_type addr, unsigned &id
                 assert( line->m_status == INVALID );
             }
         }
-
-        // find index of where to put new tag entry if there was not a hit
-        if (line->m_status == INVALID)
+        else // if the tag doesn't match
         {
-            // if found free line
-            invalid_line = index;
-        }
-        else
-        {   // uses LFU (least frequently used) for eviction/replacement
-        		if ( line->m_RC < min_RC )
-            {
-        			min_RC = line->m_RC;
-              valid_line = index;
-            }
+          // find index of where to put new tag entry if there was not a hit
+          if (line->m_status == INVALID)
+          {
+              // if found free line
+              invalid_line = index;
+          }
+          else if(line->m_status != RESERVED)
+          {   // uses LFU (least frequently used) for eviction/replacement
+              all_reserved = false;
+          		if ( line->m_RC < min_RC )
+              {
+          			min_RC = line->m_RC;
+                valid_line = index;
+              }
+          }
         }
     }
-
+    // if everything reserved
+    if(all_reserved)
+    {
+      printf("idx = NULL RESERVATION_FAIL");
+      return T_RESERVATION_FAIL;
+    }
     // if free line
-    if ( invalid_line != (unsigned)-1 )
+    else if ( invalid_line != (unsigned)-1 )
     {
         idx = invalid_line;
         printf("\n\tidx is LFU");
@@ -1703,7 +1711,7 @@ enum tag_store_request_status l1_cache::process_tag_store_probe(enum tag_store_r
     enum tag_block_position_status block_pos_status = m_tag_store->get_tag_block_position(tag_index);
     if(block_pos_status==T_VALID) // in DS
     {
-      unsigned rc = m_tag_store->inc_tag_block_rc(tag_index);
+      m_tag_store->inc_tag_block_rc(tag_index);
       //printf("process_tag_store_probe() - return HIT for DS, RC_after_inc=%d\n", rc);
       return T_HIT; // go to DS
     }
@@ -1726,6 +1734,11 @@ enum tag_store_request_status l1_cache::process_tag_store_probe(enum tag_store_r
       }
     }
   }
+  else if(status == T_RESERVATION_FAIL)
+  {
+    // if you can't allocate, bypass
+    return T_BYPASS;
+  }
   else if(status == T_MISS)
   {
     //printf("process_tag_store_probe() - tag_store MISS\n");
@@ -1735,7 +1748,7 @@ enum tag_store_request_status l1_cache::process_tag_store_probe(enum tag_store_r
     //printf("process_tag_store_probe() - allocated new tag_store entry\n");
     //printf("process_tag_store_probe() - return BYPASS for DS\n");
     //bypass
-    return T_BYPASS;
+    return T_FIRST_BYPASS;
   }
 
   return status;
