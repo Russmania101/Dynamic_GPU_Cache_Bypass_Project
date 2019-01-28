@@ -1,0 +1,23 @@
+gpu-cache.cc:833:        m_tag_array->fill(e->second.m_cache_index,time);
+gpu-cache.cc:835:        m_tag_array->fill(e->second.m_block_addr,time);
+gpu-cache.cc:841:        cache_block_t &block = m_tag_array->get_block(e->second.m_cache_index);
+gpu-cache.cc:856:    m_tag_array->print(fp,accesses,misses);
+gpu-cache.cc:882:    		m_tag_array->access(block_addr,time,cache_index);
+gpu-cache.cc:884:    		m_tag_array->access(block_addr,time,cache_index,wb,evicted);
+gpu-cache.cc:890:    		m_tag_array->access(block_addr,time,cache_index);
+gpu-cache.cc:892:    		m_tag_array->access(block_addr,time,cache_index,wb,evicted);
+gpu-cache.cc:919:	m_tag_array->access(block_addr,time,cache_index); // update LRU state
+gpu-cache.cc:920:	cache_block_t &block = m_tag_array->get_block(cache_index);
+gpu-cache.cc:932:	m_tag_array->access(block_addr,time,cache_index); // update LRU state
+gpu-cache.cc:933:	cache_block_t &block = m_tag_array->get_block(cache_index);
+gpu-cache.cc:948:	cache_block_t &block = m_tag_array->get_block(cache_index);
+gpu-cache.cc:1062:    m_tag_array->access(block_addr,time,cache_index);
+gpu-cache.cc:1067:        cache_block_t &block = m_tag_array->get_block(cache_index);
+gpu-cache.cc:1124:    enum cache_request_status status = m_tag_array->probe(block_addr,cache_index);
+gpu-cache.cc:1128:        cache_status = m_tag_array->access(block_addr,time,cache_index); // update LRU state
+gpu-cache.cc:1207:    cache_block_t &old_block = m_tag_array->get_block(cache_index);
+gpu-cache.cc:1234:    cache_block_t &new_block = m_tag_array->get_block(cache_index);
+gpu-cache.cc:1261:        = m_tag_array->probe( block_addr, cache_index );
+gpu-cache.cc:1283:    enum cache_request_status probe_status = m_tag_array->probe( block_addr, cache_index );
+gpu-cache.h:711:		m_tag_array->update_cache_parameters(config);
+gpu-cache.h:727:    void flush(){m_tag_array->flush();}

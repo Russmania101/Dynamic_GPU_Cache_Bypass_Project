@@ -1,0 +1,7 @@
+#!/bin/bash
+
+clear
+make > out.txt
+cd ../benchmarks/rodinia/HS
+./HS.sh
+vi HS.OUT

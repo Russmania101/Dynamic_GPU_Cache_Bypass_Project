@@ -16,7 +16,7 @@ cp -r hs_data/ $test_dir/hs_data
 
 cd $test_dir
 ./hotspot-rodinia-3.1 512 2 2 hs_data/temp_512 hs_data/power_512 output.out > $repo/output/rodinia/HS.OUT
-
+cp $repo/output/rodinia/HS.OUT HS.OUT
 rm hotspot-rodinia-3.1
 rm -r hs_data/
 rm output.out
