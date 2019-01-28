@@ -15,6 +15,8 @@ cp hotspot-rodinia-3.1 $test_dir
 cp -r hs_data/ $test_dir/hs_data
 
 cd $test_dir
+echo -n "Start Time: "
+date "+%H:%M:%S"
 ./hotspot-rodinia-3.1 512 2 2 hs_data/temp_512 hs_data/power_512 output.out > $repo/output/rodinia/HS.OUT
 cp $repo/output/rodinia/HS.OUT $repo/benchmarks/rodinia/HS/HS.OUT
 rm hotspot-rodinia-3.1
