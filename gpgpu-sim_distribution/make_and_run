@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
 clear
-make > out.txt
+make -j > out.txt
 cd ../benchmarks/rodinia/LUD
 ./LUD.sh
