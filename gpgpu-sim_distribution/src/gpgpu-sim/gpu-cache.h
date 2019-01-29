@@ -1100,7 +1100,7 @@ public:
         access( new_addr_type addr,
                 mem_fetch *mf,
                 unsigned time,
-                std::list<cache_event> &events );
+                std::list<cache_event> &events);
     void fill(mem_fetch *mf, unsigned time);
     void fill_tag_store_block_status(unsigned tag_index)
     {

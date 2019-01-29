@@ -1358,7 +1358,7 @@ mem_stage_stall_type ldst_unit::l1d_process_memory_access_queue( cache_t *cache,
     //mem_fetch *mf = m_mf_allocator->alloc(inst,inst.accessq_back());
     std::list<cache_event> events;
     //steffygm - important enum
-    enum cache_request_status status = cache->access(mf->get_addr(),mf,gpu_sim_cycle+gpu_tot_sim_cycle,events);
+    enum cache_request_status status = m_L1D->access(mf->get_addr(),mf,gpu_sim_cycle+gpu_tot_sim_cycle,events);
     return process_cache_access( cache, mf->get_addr(), inst, events, mf, status );
 }
 
@@ -1421,6 +1421,7 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
    tag_store* l1d_tag_store = m_L1D->get_tag_store();
    if (!bypassL1D)
    {
+       printf("tag_store=%p\n", l1d_tag_store);
        tag_store_request_status probe_status = l1d_tag_store->probe(mf->get_addr(), tag_index);
        tag_store_request_status processed_probe_status = m_L1D->process_tag_store_probe(probe_status, mf->get_addr(), tag_index);
        mf->set_is_l1_op(true);
@@ -1431,12 +1432,12 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
          case T_HIT:
          {
            //go to cache
-           printf("processed tsrs=HIT\n");
+           //printf("processed tsrs=HIT\n");
            break;
          }
          case T_HIT_RESERVED:
          {
-           printf("processed tsrs=HIT_RESERVED\n");
+           //printf("processed tsrs=HIT_RESERVED\n");
            //stall_cond = COAL_STALL;
            //delete mf;
            //goto AFTER_ACCESS;
@@ -1446,37 +1447,38 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
          case T_MISS:
          {
            //go to cache
-           printf("processed tsrs=MISS\n");
+           //printf("processed tsrs=MISS\n");
            break;
          }
          case T_FIRST_BYPASS:
          {
            // allocated new entry in TS
 
-           printf("processed tsrs=FIRST_BYPASS\n");
+           //printf("processed tsrs=FIRST_BYPASS\n");
            bypassL1D = true;
            break;
          }
          case T_BYPASS:
          {
            //printf("ldst_unit::memory_cycle() - BYPASS mf_block_addr=%llu\n", m_L1D->get_block_addr(mf->get_addr()));
-           printf("processed tsrs=BYPASS\n");
+           //printf("processed tsrs=BYPASS\n");
            bypassL1D = true;
            break;
          }
          case T_RESERVATION_FAIL:
          {
 
-           printf("processed tsrs=RESERVATION_FAIL\n");
+           //printf("processed tsrs=RESERVATION_FAIL\n");
            //stall_cond = COAL_STALL;
            //delete mf;
            //goto AFTER_ACCESS;
+           //allowed_to_probe=false;
            bypassL1D=true;
            break;
          }
          default:
          {
-           printf("processed tsrs= (?) %d\n", processed_probe_status);
+           //printf("processed tsrs= (?) %d\n", processed_probe_status);
            break;
          }
        }
@@ -1950,7 +1952,6 @@ void ldst_unit::cycle()
                  }
                }
                if( bypassL1D ) {
-                   printf("\t\tBYPASS\n");
                    if ( m_next_global == NULL ) {
                        mf->set_status(IN_SHADER_FETCHED,gpu_sim_cycle+gpu_tot_sim_cycle);
                        m_response_fifo.pop_front();
