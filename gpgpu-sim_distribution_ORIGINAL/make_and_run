@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+clear
+make > out.txt
+cd ../benchmarks/rodinia/LUD
+./LUD.sh
