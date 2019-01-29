@@ -3,3 +3,5 @@ benchmarks/test/gpgpusim_power_report_*
 gpgpu-sim_distribution/cuobjdump_to_ptxplus/*
 gpgpu-sim_distribution*/out.txt
 benchmarks/test/gpgpu_inst_stats.txt
+gpgpu-sim_distribution/libcuda/*
+gpgpu-sim_distribution/src/intersim2/*
