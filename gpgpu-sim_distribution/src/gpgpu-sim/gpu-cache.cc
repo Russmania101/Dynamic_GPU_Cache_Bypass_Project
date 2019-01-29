@@ -1718,7 +1718,7 @@ enum tag_store_request_status l1_cache::process_tag_store_probe(enum tag_store_r
   {
     printf("process_tag_store_probe() - tag_store HIT\n");
     enum tag_block_position_status block_pos_status = m_tag_store->get_tag_block_position(tag_index);
-    m_tag_store->inc_tag_block_rc(tag_index); // Increment RC
+    unsigned rc = m_tag_store->inc_tag_block_rc(tag_index); // Increment RC
     if(block_pos_status==DS_VALID) // in DS
     {
       printf("process_tag_store_probe() - return T_HIT (block_pos_status=DS_VALID)\n");

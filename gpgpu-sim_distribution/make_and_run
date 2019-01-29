@@ -2,5 +2,5 @@
 set -e
 clear
 make -j > out.txt
-cd ../benchmarks/rodinia/LUD
-./LUD.sh
+cd ../benchmarks/rodinia/PTF
+./PTF_FLOAT.sh
