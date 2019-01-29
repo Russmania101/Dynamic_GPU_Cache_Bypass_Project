@@ -12,7 +12,7 @@ echo "test" directory: $test_dir
 
 cd $lfk
 cp leukocyte-rodinia-3.1 $test_dir
-cp -r lfk_data/ $test_dir/cfd_data
+cp -r lfk_data/ $test_dir/lfk_data
 
 cd $test_dir
 echo -n "Start Time: "

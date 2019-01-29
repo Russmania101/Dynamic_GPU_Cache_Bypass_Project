@@ -18,9 +18,9 @@ cd $test_dir
 echo -n "Start Time: "
 date "+%H:%M:%S"
 
-./cfd-rodinia-3.1 cfd_data/cfd/fvcorr.domn.097K > $repo/output/rodinia/CFD-1.OUT
-./cfd-rodinia-3.1 cfd_data/cfd/fvcorr.domn.193K > $repo/output/rodinia/CFD-2.OUT
-./eulcfd-rodinia-3.1er3d cfd_data/cfd/missile.domn.0.2M > $repo/output/rodinia/CFD-3.OUT
+./cfd-rodinia-3.1 cfd_data/fvcorr.domn.097K > $repo/output/rodinia/CFD-1.OUT
+./cfd-rodinia-3.1 cfd_data/fvcorr.domn.193K > $repo/output/rodinia/CFD-2.OUT
+./eulcfd-rodinia-3.1er3d cfd_data/missile.domn.0.2M > $repo/output/rodinia/CFD-3.OUT
 
 rm cfd-rodinia-3.1
 rm -r cfd_data/

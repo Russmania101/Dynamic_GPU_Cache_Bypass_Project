@@ -18,7 +18,7 @@ cd $test_dir
 echo -n "Start Time: "
 date "+%H:%M:%S"
 
-./leukocyte-rodinia-3.1 /lfk_data/leukocyte/testfile.avi 5  > $repo/output/rodinia/LFK.OUT
+./leukocyte-rodinia-3.1 /lfk_data/testfile.avi 5  > $repo/output/rodinia/LFK.OUT
 
 rm leukocyte-rodinia-3.1
 rm -r lfk_data/

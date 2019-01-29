@@ -22,7 +22,6 @@ date "+%H:%M:%S"
 ./cfd-rodinia-3.1 cfd_data/cfd/fvcorr.domn.193K > $repo/output/rodinia/CFD-2.OUT
 ./eulcfd-rodinia-3.1er3d cfd_data/cfd/missile.domn.0.2M > $repo/output/rodinia/CFD-3.OUT
 
-#cp $repo/output/rodinia/CFD.OUT $repo/benchmarks/rodinia/CFD/CFD.OUT
 rm cfd-rodinia-3.1
 rm -r cfd_data/
 

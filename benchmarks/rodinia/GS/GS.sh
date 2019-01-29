@@ -18,7 +18,7 @@ cd $test_dir
 echo -n "Start Time: "
 date "+%H:%M:%S"
 
-./gaussian-rodinia-3.1 -f gs_data/gaussian/matrix4.txt > $repo/output/rodinia/GS-1.OUT
+./gaussian-rodinia-3.1 -f gs_data/matrix4.txt > $repo/output/rodinia/GS-1.OUT
 ./gaussian-rodinia-3.1 -s 16 > $repo/output/rodinia/GS-2.OUT
 
 rm gaussian-rodinia-3.1
