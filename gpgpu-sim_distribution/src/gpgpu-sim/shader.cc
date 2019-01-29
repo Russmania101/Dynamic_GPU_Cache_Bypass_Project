@@ -1434,6 +1434,15 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
            printf("processed tsrs=HIT\n");
            break;
          }
+         case T_HIT_RESERVED:
+         {
+           printf("processed tsrs=HIT_RESERVED\n");
+           //stall_cond = COAL_STALL;
+           //delete mf;
+           //goto AFTER_ACCESS;
+           bypassL1D = true;
+           break;
+         }
          case T_MISS:
          {
            //go to cache
@@ -1457,20 +1466,18 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
          }
          case T_RESERVATION_FAIL:
          {
-           // should never return this at this stage, but should bypass if this is the tag store response
 
            printf("processed tsrs=RESERVATION_FAIL\n");
-           bypassL1D = true;
-           break;
-         }
-         case T_NO_TS_ENTRY:
-         {
-           printf("Error? - memory cycle tag_store probe with T_NO_TS_ENTRY\n");
+           //stall_cond = COAL_STALL;
+           //delete mf;
+           //goto AFTER_ACCESS;
+           bypassL1D=true;
            break;
          }
          default:
          {
            printf("processed tsrs= (?) %d\n", processed_probe_status);
+           break;
          }
        }
     }
@@ -1502,6 +1509,8 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
        assert( CACHE_UNDEFINED != inst.cache_op );
        stall_cond = l1d_process_memory_access_queue(m_L1D,inst, mf);
    }
+
+AFTER_ACCESS:
    if( !inst.accessq_empty() )
        stall_cond = COAL_STALL;
    if (stall_cond != NO_RC_FAIL) {
@@ -1921,23 +1930,27 @@ void ldst_unit::cycle()
                }
 
 
+               //printf("ldst_unit::cycle() - mf=%p\n", mf);
                if(mf->get_is_l1_op())
                {
                  tag_store_request_status mf_TS_status = (tag_store_request_status) mf->get_tag_store_probe_status();
                  unsigned mf_TS_index = mf->get_tag_store_index();
-                 if(mf_TS_status == T_FIRST_BYPASS)
+                 printf("ldst_unit::cycle() - mf=%p\n\t\ttag_index=%u\n", mf, mf_TS_index);
+                 if(mf_TS_status == (unsigned) T_FIRST_BYPASS)
                  {
                    // fill TS m_status
+                   printf("\t\tfill_tag_store_block_status @ idx=%u\n", mf_TS_index);
                    m_L1D->fill_tag_store_block_status(mf_TS_index);
                    bypassL1D = true;
                  }
-                 else if(mf_TS_status == T_BYPASS)
+                 else if(mf_TS_status == T_BYPASS || mf_TS_status == T_HIT_RESERVED || mf_TS_status == T_RESERVATION_FAIL)
                  {
+                   printf("\t\tNot First Bypass\n");
                    bypassL1D = true;
                  }
                }
                if( bypassL1D ) {
-                   //printf("ldst_unit::cycle() - mf_status=%d bypass\n", mf->get_status());
+                   printf("\t\tBYPASS\n");
                    if ( m_next_global == NULL ) {
                        mf->set_status(IN_SHADER_FETCHED,gpu_sim_cycle+gpu_tot_sim_cycle);
                        m_response_fifo.pop_front();
@@ -1947,7 +1960,7 @@ void ldst_unit::cycle()
 
                    //printf("ldst_unit::cycle() - mf_status=%d not bypass\n", mf->get_status());
                    if (m_L1D->fill_port_free()) {
-                      //printf("ldst_unit::cycle() - mf=%p\n", mf);
+                      printf("\t\tFILL L1D\n");
                        m_L1D->fill(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
                        m_response_fifo.pop_front();
                    }

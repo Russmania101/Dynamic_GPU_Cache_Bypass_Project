@@ -175,7 +175,8 @@ enum tag_store_request_status tag_store::probe( new_addr_type addr, unsigned &id
     bool all_reserved = true;
     // check for hit
     // TODO - hardcode 2* way of l1d
-    for (unsigned way=0; way<2*m_config.m_assoc; way++) {
+    for (unsigned way=0; way<2*m_config.m_assoc; way++)
+    {
         unsigned index = set_index*(2*m_config.m_assoc)+way;
         tag_block_t *line = &m_lines[index];
         if (line->m_tag == tag) {
@@ -185,45 +186,57 @@ enum tag_store_request_status tag_store::probe( new_addr_type addr, unsigned &id
                 printf("\n\tidx=%u T_HIT\n",idx);
                 return T_HIT;
             }
+            else if (line->m_status == RESERVED )
+            {
+              //
+              printf("\n\tidx=%u T_HIT_RESERVED\nf", index);
+              return T_HIT_RESERVED;
+            }
             else
-            { // not in tag store
+            { //should never happen if the tag mathces
+                printf("\n\tidx=%u tag matched, INVALID\n", index);
                 assert( line->m_status == INVALID );
             }
         }
-        else // if the tag doesn't match
+
+        if(line->m_status != RESERVED)
         {
+          all_reserved = false;
           // find index of where to put new tag entry if there was not a hit
           if (line->m_status == INVALID)
           {
               // if found free line
+              //printf("\n\tinvalid_line = %u", index);
               invalid_line = index;
           }
-          else if(line->m_status != RESERVED)
+          else
           {   // uses LFU (least frequently used) for eviction/replacement
-              all_reserved = false;
           		if ( line->m_RC < min_RC )
               {
+                //printf("\n\tvalid_line=%u", index);
           			min_RC = line->m_RC;
                 valid_line = index;
               }
           }
         }
+
     }
     // if everything reserved
     if(all_reserved)
     {
-      printf("idx = NULL RESERVATION_FAIL");
+      printf("\n\tidx = NULL RESERVATION_FAIL\n");
       return T_RESERVATION_FAIL;
     }
     // if free line
     else if ( invalid_line != (unsigned)-1 )
     {
+        printf("\n\tidx=%u set to invalid_line", invalid_line);
         idx = invalid_line;
-        printf("\n\tidx is LFU");
     }
     // if no free line, evict
     else if ( valid_line != (unsigned)-1)
     {
+        printf("\n\tidx=%u set to valid_line", valid_line);
         idx = valid_line;
     }
     else
@@ -867,7 +880,7 @@ void l1_cache::fill(mem_fetch *mf, unsigned time){
     mf->set_data_size( e->second.m_data_size );
     // if ( m_config.m_alloc_policy == ON_MISS )
     m_tag_array->fill(e->second.m_cache_index,time);
-
+    m_tag_store->fill_status(mf->get_tag_store_index());
     cache_block_t *new_block = m_tag_array->get_block_ptr(e->second.m_cache_index);
     new_addr_type new_tag = new_block->m_tag;
     new_addr_type new_block_addr = new_block->m_block_addr;
@@ -1000,8 +1013,9 @@ void l1_cache::send_read_request(new_addr_type addr, new_addr_type block_addr, u
                 unsigned index = e_set_index*(2*m_config.m_assoc)+way;
                 tag_block_t *line = m_tag_store->get_block_ptr(index);
                 if (line->m_tag == evicted_tag) {
+                    printf("EVICT idx=%u\n", index);
                     line->m_RC = 0;
-                    line->m_pos = T_INVALID;
+                    line->m_pos = DS_INVALID;
                     line->m_tag = 0;
                     line->m_status = INVALID;
                     break;
@@ -1066,7 +1080,7 @@ void l1_cache::send_read_request(new_addr_type addr, new_addr_type block_addr, u
                 tag_block_t *line = m_tag_store->get_block_ptr(index);
                 if (line->m_tag == evicted_tag) {
                     line->m_RC = 0;
-                    line->m_pos = T_INVALID;
+                    line->m_pos = DS_INVALID;
                     line->m_tag = 0;
                     line->m_status = INVALID;
                     break;
@@ -1640,14 +1654,6 @@ l1_cache::process_tag_probe( bool wr,
     return access_status;
 }
 
-enum tag_store_request_status l1_cache::peek_tag_store(new_addr_type addr)
-{
-  unsigned tag_index = (unsigned) -1;
-  tag_store_request_status probe_result = m_tag_store->probe( addr, tag_index );
-  return process_tag_store_peek(probe_result, addr, tag_index);
-  //return probe_result;
-}
-
 // Both the L1 and L2 currently use the same access function.
 // Differentiation between the two caches is done through configuration
 // of caching policies.
@@ -1707,15 +1713,21 @@ enum tag_store_request_status l1_cache::process_tag_store_probe(enum tag_store_r
 
   if(status == T_HIT)
   {
-    //printf("process_tag_store_probe() - tag_store HIT\n");
+    printf("process_tag_store_probe() - tag_store HIT\n");
     enum tag_block_position_status block_pos_status = m_tag_store->get_tag_block_position(tag_index);
-    if(block_pos_status==T_VALID) // in DS
+    if(block_pos_status==DS_VALID) // in DS
     {
       m_tag_store->inc_tag_block_rc(tag_index);
-      //printf("process_tag_store_probe() - return HIT for DS, RC_after_inc=%d\n", rc);
+      printf("process_tag_store_probe() - return T_HIT (block_pos_status=DS_VALID)\n");
       return T_HIT; // go to DS
     }
-    else // pos is invalid - not in DS
+    else if(block_pos_status==DS_RESERVED)
+    {
+      //TEMP ?
+      printf("process_tag_store_probe() - return T_HIT_RESERVED (block_pos_status=DS_RESERVED)\n");
+      return T_HIT_RESERVED;
+    }
+    else // pos is DS_INVALID - not in DS
     {
       unsigned rc = m_tag_store->inc_tag_block_rc(tag_index);
       //printf("process_tag_store_probe() - INVALID POSITION, RC_after_inc=%d\n", rc);
@@ -1724,20 +1736,29 @@ enum tag_store_request_status l1_cache::process_tag_store_probe(enum tag_store_r
       {
         //printf("process_tag_store_probe() - return MISS for DS, RC > 2\n");
         // reserve the position - the DS entry is on its way to being filled
-        //m_tag_store->reserve_tag_block_position(tag_index);
+
+        printf("process_tag_store_probe() - return T_MISS (block_pos_status=DS_INVALID, rc = %u)\n", rc);
+        m_tag_store->reserve_tag_block_position(tag_index);
         return T_MISS; // allocate new entry in DS
       }
       else
       {
         //printf("process_tag_store_probe() - return BYPASS for DS, RC <= 2\n");
+        printf("process_tag_store_probe() - return T_BYPASS (block_pos_status=DS_INVALID, rc = %u)\n", rc);
         return T_BYPASS; //bypass DS
       }
     }
   }
+  else if (status == T_HIT_RESERVED)
+  {
+    printf("process_tag_store_probe() - return T_HIT_RESERVED (status=T_HIT_RESERVED)\n");
+    return T_HIT_RESERVED;
+  }
   else if(status == T_RESERVATION_FAIL)
   {
     // if you can't allocate, bypass
-    return T_BYPASS;
+    printf("process_tag_store_probe() - return T_RESERVATION_FAIL (status=T_RESERVATION_FAIL)\n");
+    return T_RESERVATION_FAIL;
   }
   else if(status == T_MISS)
   {
@@ -1748,52 +1769,12 @@ enum tag_store_request_status l1_cache::process_tag_store_probe(enum tag_store_r
     //printf("process_tag_store_probe() - allocated new tag_store entry\n");
     //printf("process_tag_store_probe() - return BYPASS for DS\n");
     //bypass
+
+    printf("process_tag_store_probe() - return T_FIRST_BYPASS (status=T_MISS)\n");
     return T_FIRST_BYPASS;
   }
 
-  return status;
-}
-
-// return HIT = in DS, MISS = need to allocate in DS, BYPASS = bypass l1
-enum tag_store_request_status l1_cache::process_tag_store_peek(tag_store_request_status status,
-                                                            new_addr_type addr,
-                                                            unsigned tag_index)
-{
-  if(status == T_HIT)
-  {
-    enum tag_block_position_status block_pos_status = m_tag_store->get_tag_block_position(tag_index);
-    if(block_pos_status==T_VALID) // in DS
-    {
-      //unsigned rc = m_tag_store->inc_tag_block_rc(tag_index);
-      return T_HIT; // go to DS
-    }
-    else // pos is invalid - not in DS
-    {
-      //unsigned rc = m_tag_store->inc_tag_block_rc(tag_index);
-      unsigned rc = m_tag_store->get_tag_block_rc(tag_index);
-      // TODO move threshold to config FILE
-      if(rc > 2)
-      {
-        // reserve the position - the DS entry is on its way to being filled
-        //m_tag_store->reserve_tag_block_position(tag_index);
-        printf("RC = %d\n", rc);
-        return T_MISS; // allocate new entry in DS
-      }
-      else
-      {
-        printf("In TS, but rc <=2\n");
-        return T_BYPASS; //bypass DS
-      }
-    }
-  }
-  else if(status == T_MISS)
-  {
-    //alloc new tag_store entry
-    //m_tag_store->allocate_new_entry(tag, tag_index);
-    printf("Not in TS\n");
-    return T_NO_TS_ENTRY;
-  }
-
+  printf("process_tag_store_probe() - return %u\n", (unsigned) status);
   return status;
 }
 

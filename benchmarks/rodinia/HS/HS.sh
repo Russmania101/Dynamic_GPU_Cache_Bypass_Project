@@ -25,4 +25,6 @@ rm output.out
 
 echo "Rodinia HS Complete"
 echo "Exiting..."
+echo -n "End Time: "
+date "+%H:%M:%S"
 

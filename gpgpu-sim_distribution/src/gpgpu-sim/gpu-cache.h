@@ -54,11 +54,11 @@ enum cache_request_status {
 
 enum tag_store_request_status {
       T_HIT = 0,
+      T_HIT_RESERVED,
       T_RESERVATION_FAIL,
       T_MISS,
       T_FIRST_BYPASS,
-      T_BYPASS,
-      T_NO_TS_ENTRY
+      T_BYPASS
 };
 
 enum cache_event {
@@ -73,29 +73,29 @@ const char * cache_request_status_str(enum cache_request_status status);
 
 enum tag_block_position_status
 {
-    T_INVALID = 0,
-    T_VALID,
-    T_RESERVED
+    DS_INVALID = 0,
+    DS_VALID,
+    DS_RESERVED
 };
 
 struct tag_block_t {
     tag_block_t()
     {
         m_RC=0;
-	      m_pos=T_INVALID;
+	      m_pos=DS_INVALID;
         m_tag=0;
         m_status=INVALID;
     }
     void allocate( new_addr_type tag)
     {
         m_RC=0;
-	      m_pos=T_INVALID;
+	      m_pos=DS_INVALID;
 	      m_tag=tag;
         m_status=RESERVED;
     }
     void fill()
     {
-      m_pos=T_VALID;
+      m_pos=DS_VALID;
     }
     void fill_status()
     {
@@ -103,7 +103,7 @@ struct tag_block_t {
     }
     void reserve_pos()
     {
-      m_pos=T_RESERVED;
+      m_pos=DS_RESERVED;
     }
 
     new_addr_type               m_tag;
@@ -398,13 +398,17 @@ public:
     void allocate_new_entry(new_addr_type tag, unsigned tag_index);
     void reserve_tag_block_position(unsigned tag_index)
     {
-      m_lines[tag_index].m_pos = T_RESERVED;
+      m_lines[tag_index].m_pos = DS_RESERVED;
     }
     enum tag_block_position_status get_tag_block_position(unsigned tag_index);
     void update_tag_block_position(enum tag_block_position_status new_position_status, unsigned tag_index);
     void fill_tag_block_status(unsigned tag_index)
     {
       m_lines[tag_index].fill_status();
+    }
+    void fill_status(unsigned tag_index)
+    {
+      m_lines[tag_index].fill();
     }
     unsigned get_tag_block_rc(unsigned tag_index)
     {
@@ -1105,10 +1109,7 @@ public:
     enum tag_store_request_status process_tag_store_probe(enum tag_store_request_status status,
                                                   new_addr_type addr,
                                                   unsigned tag_index);
-    enum tag_store_request_status peek_tag_store(new_addr_type addr);
-    enum tag_store_request_status process_tag_store_peek(enum tag_store_request_status status,
-                                                                new_addr_type addr,
-                                                                unsigned tag_index);
+
     void send_write_request(mem_fetch *mf, cache_event request, unsigned time, std::list<cache_event> &events);
     enum cache_request_status wr_miss_wa( new_addr_type addr,
                                                     unsigned cache_index, mem_fetch *mf,
