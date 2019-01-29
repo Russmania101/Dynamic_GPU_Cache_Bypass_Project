@@ -1079,6 +1079,8 @@ void l1_cache::send_read_request(new_addr_type addr, new_addr_type block_addr, u
                 unsigned index = e_set_index*(2*m_config.m_assoc)+way;
                 tag_block_t *line = m_tag_store->get_block_ptr(index);
                 if (line->m_tag == evicted_tag) {
+
+                    printf("EVICT idx=%u\n", index);
                     line->m_RC = 0;
                     line->m_pos = DS_INVALID;
                     line->m_tag = 0;
@@ -1696,6 +1698,7 @@ l1_cache::access( new_addr_type addr,
     bool wr = mf->get_is_write();
     new_addr_type block_addr = m_config.block_addr(addr);
     unsigned cache_index = (unsigned)-1;
+
     enum cache_request_status probe_status = m_tag_array->probe( block_addr, cache_index );
     enum cache_request_status access_status = process_tag_probe( wr, probe_status, addr, cache_index, mf, time, events );
     m_stats.inc_stats(mf->get_access_type(), m_stats.select_stats_status(probe_status, access_status));
@@ -1732,12 +1735,12 @@ enum tag_store_request_status l1_cache::process_tag_store_probe(enum tag_store_r
       unsigned rc = m_tag_store->inc_tag_block_rc(tag_index);
       //printf("process_tag_store_probe() - INVALID POSITION, RC_after_inc=%d\n", rc);
       // TODO move threshold to config FILE
-      if(rc > 2)
+      if(rc > 0)
       {
         //printf("process_tag_store_probe() - return MISS for DS, RC > 2\n");
         // reserve the position - the DS entry is on its way to being filled
 
-        printf("process_tag_store_probe() - return T_MISS (block_pos_status=DS_INVALID, rc = %u)\n", rc);
+        printf("process_tag_store_probe() - return T_MISS (block_pos_status=DS_RESERVED, rc = %u)\n", rc);
         m_tag_store->reserve_tag_block_position(tag_index);
         return T_MISS; // allocate new entry in DS
       }

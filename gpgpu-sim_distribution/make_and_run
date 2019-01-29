@@ -2,6 +2,5 @@
 set -e
 clear
 make > out.txt
-cd ../benchmarks/rodinia/HS
-./HS.sh
-vi HS.OUT
+cd ../benchmarks/rodinia/LUD
+./LUD.sh
