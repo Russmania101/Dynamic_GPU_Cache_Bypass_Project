@@ -15,11 +15,14 @@ cp lud-rodinia-3.1 $test_dir
 cp -r lud_data/ $test_dir/lud_data
 
 cd $test_dir
+echo -n "Start Time: "
+date "+%H:%M:%S"
 ./lud-rodinia-3.1 -s 256 -v > $repo/output/rodinia/LUD.OUT
 
 rm lud-rodinia-3.1
 rm -r lud_data/
-
+echo -n "END Time: "
+date "+%H:%M:%S"
 echo "Rodinia LUD Complete"
 echo "Exiting..."
 
