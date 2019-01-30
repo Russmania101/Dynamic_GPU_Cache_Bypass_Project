@@ -1720,8 +1720,8 @@ enum tag_store_request_status l1_cache::process_tag_store_probe(enum tag_store_r
     enum tag_block_position_status block_pos_status = m_tag_store->get_tag_block_position(tag_index);
     if(block_pos_status==DS_VALID) // in DS
     {
-      m_tag_store->inc_tag_block_rc(tag_index);
       printf("process_tag_store_probe() - return T_HIT (block_pos_status=DS_VALID)\n");
+      unsigned rc = m_tag_store->inc_tag_block_rc(tag_index); // Increment RC
       return T_HIT; // go to DS
     }
     else if(block_pos_status==DS_RESERVED)
@@ -1732,10 +1732,10 @@ enum tag_store_request_status l1_cache::process_tag_store_probe(enum tag_store_r
     }
     else // pos is DS_INVALID - not in DS
     {
-      unsigned rc = m_tag_store->inc_tag_block_rc(tag_index);
+    unsigned rc = m_tag_store->inc_tag_block_rc(tag_index); // Increment RC
       //printf("process_tag_store_probe() - INVALID POSITION, RC_after_inc=%d\n", rc);
       // TODO move threshold to config FILE
-      if(rc > 0)
+      if(rc > 2)
       {
         //printf("process_tag_store_probe() - return MISS for DS, RC > 2\n");
         // reserve the position - the DS entry is on its way to being filled
@@ -1755,6 +1755,7 @@ enum tag_store_request_status l1_cache::process_tag_store_probe(enum tag_store_r
   else if (status == T_HIT_RESERVED)
   {
     printf("process_tag_store_probe() - return T_HIT_RESERVED (status=T_HIT_RESERVED)\n");
+    //m_tag_store->inc_tag_block_rc(tag_index);
     return T_HIT_RESERVED;
   }
   else if(status == T_RESERVATION_FAIL)
