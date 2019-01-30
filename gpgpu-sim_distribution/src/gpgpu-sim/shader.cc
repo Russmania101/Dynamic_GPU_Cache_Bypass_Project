@@ -1344,7 +1344,7 @@ mem_stage_stall_type ldst_unit::process_memory_access_queue( cache_t *cache, war
 
 mem_stage_stall_type ldst_unit::l1d_process_memory_access_queue( cache_t *cache, warp_inst_t &inst, mem_fetch *mf )
 {
-    printf("ldst_unit::l1d_process_memory_access_queue() - mf=%p\n", mf);
+    //printf("ldst_unit::l1d_process_memory_access_queue() - mf=%p\n", mf);
     mem_stage_stall_type result = NO_RC_FAIL;
     if( inst.accessq_empty() )
         return result;
@@ -1417,11 +1417,11 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
 
    unsigned tag_index = (unsigned) -1;
    mem_fetch *mf = m_mf_allocator->alloc(inst,access);
-   printf("ldst_unit::memory_cycle() - mf=%p\n", mf);
+   //printf("ldst_unit::memory_cycle() - mf=%p\n", mf);
    tag_store* l1d_tag_store = m_L1D->get_tag_store();
    if (!bypassL1D)
    {
-       printf("tag_store=%p\n", l1d_tag_store);
+       //printf("tag_store=%p\n", l1d_tag_store);
        tag_store_request_status probe_status = l1d_tag_store->probe(mf->get_addr(), tag_index);
        tag_store_request_status processed_probe_status = m_L1D->process_tag_store_probe(probe_status, mf->get_addr(), tag_index);
        mf->set_is_l1_op(true);
@@ -1485,14 +1485,14 @@ bool ldst_unit::memory_cycle( warp_inst_t &inst, mem_stage_stall_type &stall_rea
     }
 
    if( bypassL1D ) {
-        printf("ldst_unit::memory_cycle() - mf=%p BYPASS\n", mf);
+        //printf("ldst_unit::memory_cycle() - mf=%p BYPASS\n", mf);
        // bypass L1 cache
        unsigned control_size = inst.is_store() ? WRITE_PACKET_SIZE : READ_PACKET_SIZE;
        unsigned size = access.get_size() + control_size;
        if( m_icnt->full(size, inst.is_store() || inst.isatomic()) ) {
            stall_cond = ICNT_RC_FAIL;
            //printf("ldst_unit::memory_cycle() - icnt is full: mf_block_addr=%llu\n", m_L1D->get_block_addr(mf->get_addr()));
-           printf("ldst_unit::memory_cycle() - delete mf=%p\n", mf);
+           //printf("ldst_unit::memory_cycle() - delete mf=%p\n", mf);
            delete mf;
        } else {
            //mem_fetch *mf = m_mf_allocator->alloc(inst,access);
@@ -1840,7 +1840,7 @@ void ldst_unit::writeback()
                 if( m_next_global->isatomic() )
                     m_core->decrement_atomic_count(m_next_global->get_wid(),m_next_global->get_access_warp_mask().count());
 
-                printf("ldst_unit::writeback() - m_next_global_block_addr=%llu\n", m_L1D->get_block_addr(m_next_global->get_addr()));
+                //printf("ldst_unit::writeback() - m_next_global_block_addr=%llu\n", m_L1D->get_block_addr(m_next_global->get_addr()));
                 delete m_next_global;
                 m_next_global = NULL;
                 serviced_client = next_client;
@@ -1850,7 +1850,7 @@ void ldst_unit::writeback()
             if( m_L1D && m_L1D->access_ready() ) {
                 mem_fetch *mf = m_L1D->next_access();
                 m_next_wb = mf->get_inst();
-                printf("ldst_unit::writeback() - mf_block_addr=%llu\n", m_L1D->get_block_addr(mf->get_addr()));
+                //printf("ldst_unit::writeback() - mf_block_addr=%llu\n", m_L1D->get_block_addr(mf->get_addr()));
                 delete mf;
                 serviced_client = next_client;
             }
@@ -1918,7 +1918,7 @@ void ldst_unit::cycle()
     	   if( mf->get_type() == WRITE_ACK || ( m_config->gpgpu_perfect_mem && mf->get_is_write() )) {
                m_core->store_ack(mf);
                m_response_fifo.pop_front();
-               printf("ldst_unit::cycle() - write mf_block_addr=%llu\n", m_L1D->get_block_addr(mf->get_addr()));
+               //printf("ldst_unit::cycle() - write mf_block_addr=%llu\n", m_L1D->get_block_addr(mf->get_addr()));
                delete mf;
            } else {
                assert( !mf->get_is_write() ); // L1 cache is write evict, allocate line on load miss only
@@ -1937,17 +1937,17 @@ void ldst_unit::cycle()
                {
                  tag_store_request_status mf_TS_status = (tag_store_request_status) mf->get_tag_store_probe_status();
                  unsigned mf_TS_index = mf->get_tag_store_index();
-                 printf("ldst_unit::cycle() - mf=%p\n\t\ttag_index=%u\n", mf, mf_TS_index);
+                 //printf("ldst_unit::cycle() - mf=%p\n\t\ttag_index=%u\n", mf, mf_TS_index);
                  if(mf_TS_status == (unsigned) T_FIRST_BYPASS)
                  {
                    // fill TS m_status
-                   printf("\t\tfill_tag_store_block_status @ idx=%u\n", mf_TS_index);
+                   //printf("\t\tfill_tag_store_block_status @ idx=%u\n", mf_TS_index);
                    m_L1D->fill_tag_store_block_status(mf_TS_index);
                    bypassL1D = true;
                  }
                  else if(mf_TS_status == T_BYPASS || mf_TS_status == T_HIT_RESERVED || mf_TS_status == T_RESERVATION_FAIL)
                  {
-                   printf("\t\tNot First Bypass\n");
+                   //printf("\t\tNot First Bypass\n");
                    bypassL1D = true;
                  }
                }
@@ -1961,7 +1961,7 @@ void ldst_unit::cycle()
 
                    //printf("ldst_unit::cycle() - mf_status=%d not bypass\n", mf->get_status());
                    if (m_L1D->fill_port_free()) {
-                      printf("\t\tFILL L1D\n");
+                      //printf("\t\tFILL L1D\n");
                        m_L1D->fill(mf,gpu_sim_cycle+gpu_tot_sim_cycle);
                        m_response_fifo.pop_front();
                    }
