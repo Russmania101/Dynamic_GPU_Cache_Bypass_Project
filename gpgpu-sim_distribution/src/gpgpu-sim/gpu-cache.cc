@@ -168,7 +168,7 @@ enum tag_store_request_status tag_store::probe( new_addr_type addr, unsigned &id
     new_addr_type block_addr = m_config.block_addr(addr);
     unsigned set_index = m_config.set_index(block_addr);
     new_addr_type tag = m_config.tag(block_addr);
-    printf("TAG STORE PROBE\n\taddr=%llu\n\tblock_addr=%llu\n\ttag=%llu", addr, block_addr, tag);
+    //printf("TAG STORE PROBE\n\taddr=%llu\n\tblock_addr=%llu\n\ttag=%llu", addr, block_addr, tag);
     unsigned invalid_line = (unsigned)-1;
     unsigned valid_line = (unsigned)-1;
     unsigned min_RC = (unsigned)-1;
@@ -183,18 +183,18 @@ enum tag_store_request_status tag_store::probe( new_addr_type addr, unsigned &id
             if ( line->m_status == VALID )
             { // in tag store
                 idx = index;
-                printf("\n\tidx=%u T_HIT\n",idx);
+                //printf("\n\tidx=%u T_HIT\n",idx);
                 return T_HIT;
             }
             else if (line->m_status == RESERVED )
             {
               //
-              printf("\n\tidx=%u T_HIT_RESERVED\nf", index);
+              //printf("\n\tidx=%u T_HIT_RESERVED\nf", index);
               return T_HIT_RESERVED;
             }
             else
             { //should never happen if the tag mathces
-                printf("\n\tidx=%u tag matched, INVALID\n", index);
+                //printf("\n\tidx=%u tag matched, INVALID\n", index);
                 assert( line->m_status == INVALID );
             }
         }
@@ -224,26 +224,26 @@ enum tag_store_request_status tag_store::probe( new_addr_type addr, unsigned &id
     // if everything reserved
     if(all_reserved)
     {
-      printf("\n\tidx = NULL RESERVATION_FAIL\n");
+      //printf("\n\tidx = NULL RESERVATION_FAIL\n");
       return T_RESERVATION_FAIL;
     }
     // if free line
     else if ( invalid_line != (unsigned)-1 )
     {
-        printf("\n\tidx=%u set to invalid_line", invalid_line);
+        //printf("\n\tidx=%u set to invalid_line", invalid_line);
         idx = invalid_line;
     }
     // if no free line, evict
     else if ( valid_line != (unsigned)-1)
     {
-        printf("\n\tidx=%u set to valid_line", valid_line);
+        //printf("\n\tidx=%u set to valid_line", valid_line);
         idx = valid_line;
     }
     else
     {
       abort(); // if an unreserved block exists, it is either invalid or replaceable
     }
-    printf("\n\tidx=%u T_MISS\n",idx);
+    //printf("\n\tidx=%u T_MISS\n",idx);
     return T_MISS;
 }
 
@@ -873,7 +873,7 @@ void baseline_cache::fill(mem_fetch *mf, unsigned time){
 void l1_cache::fill(mem_fetch *mf, unsigned time){
     extra_mf_fields_lookup::iterator e = m_extra_mf_fields.find(mf);
 
-    printf("l1_cache::fill() - mf=%p\n", mf);
+    //printf("l1_cache::fill() - mf=%p\n", mf);
 
     assert( e != m_extra_mf_fields.end() );
     assert( e->second.m_valid );
@@ -896,7 +896,7 @@ void l1_cache::fill(mem_fetch *mf, unsigned time){
             break;
         }
     }
-    printf("l1_cache::fill() - fill:%llu\n", new_block_addr);
+    //printf("l1_cache::fill() - fill:%llu\n", new_block_addr);
 
     bool has_atomic = false;
     m_mshrs.mark_ready(e->second.m_block_addr, has_atomic);
@@ -938,7 +938,7 @@ void baseline_cache::send_read_request(new_addr_type addr, new_addr_type block_a
 /// Read miss handler without writeback
 void l1_cache::send_read_request(new_addr_type addr, new_addr_type block_addr, unsigned cache_index, mem_fetch *mf,
 		unsigned time, bool &do_miss, std::list<cache_event> &events, bool read_only, bool wa){
-  printf("l1_cache::send_read_request_1() - mf=%p\n", mf);
+  //printf("l1_cache::send_read_request_1() - mf=%p\n", mf);
 	bool wb=false;
 	cache_block_t e;
 	send_read_request(addr, block_addr, cache_index, mf, time, do_miss, wb, e, events, read_only, wa);
@@ -978,7 +978,7 @@ void baseline_cache::send_read_request(new_addr_type addr, new_addr_type block_a
 /// Read miss handler. Check MSHR hit or MSHR available
 void l1_cache::send_read_request(new_addr_type addr, new_addr_type block_addr, unsigned cache_index, mem_fetch *mf,
 		unsigned time, bool &do_miss, bool &wb, cache_block_t &evicted, std::list<cache_event> &events, bool read_only, bool wa){
-    printf("l1_cache::send_read_request_2() - mf=%p\n", mf);
+    //printf("l1_cache::send_read_request_2() - mf=%p\n", mf);
     bool mshr_hit = m_mshrs.probe(block_addr);
     bool mshr_avail = !m_mshrs.full(block_addr);
     if ( mshr_hit && mshr_avail ) {
@@ -1013,7 +1013,7 @@ void l1_cache::send_read_request(new_addr_type addr, new_addr_type block_addr, u
                 unsigned index = e_set_index*(2*m_config.m_assoc)+way;
                 tag_block_t *line = m_tag_store->get_block_ptr(index);
                 if (line->m_tag == evicted_tag) {
-                    printf("EVICT idx=%u\n", index);
+                    //printf("EVICT idx=%u\n", index);
                     line->m_RC = 0;
                     line->m_pos = DS_INVALID;
                     line->m_tag = 0;
@@ -1080,7 +1080,7 @@ void l1_cache::send_read_request(new_addr_type addr, new_addr_type block_addr, u
                 tag_block_t *line = m_tag_store->get_block_ptr(index);
                 if (line->m_tag == evicted_tag) {
 
-                    printf("EVICT idx=%u\n", index);
+                    //printf("EVICT idx=%u\n", index);
                     line->m_RC = 0;
                     line->m_pos = DS_INVALID;
                     line->m_tag = 0;
@@ -1119,7 +1119,7 @@ void l1_cache::send_read_request(new_addr_type addr, new_addr_type block_addr, u
         do_miss = true;
 
         //printf("l1_cache::send_read_request() - mf=%p\n", mf);
-        printf("\t\taccess 2\n");
+        //printf("\t\taccess 2\n");
     }
     else{
       //printf("l1_cache::send_read_request() else - mf=%p, mf_block_address=%llu\n", mf, block_addr);
@@ -1135,7 +1135,7 @@ void data_cache::send_write_request(mem_fetch *mf, cache_event request, unsigned
 
 /// Sends write request to lower level memory (write or writeback)
 void l1_cache::send_write_request(mem_fetch *mf, cache_event request, unsigned time, std::list<cache_event> &events){
-    printf("l1_cache::sen_write_request() - mf=%p\n", mf);
+    //printf("l1_cache::sen_write_request() - mf=%p\n", mf);
     events.push_back(request);
     m_miss_queue.push_back(mf);
     mf->set_status(m_miss_queue_status,time);
@@ -1156,7 +1156,7 @@ cache_request_status data_cache::wr_hit_wb(new_addr_type addr, unsigned cache_in
 
 /// Write-back hit: Mark block as modified
 cache_request_status l1_cache::wr_hit_wb(new_addr_type addr, unsigned cache_index, mem_fetch *mf, unsigned time, std::list<cache_event> &events, enum cache_request_status status ){
-  printf("l1_cache::wr_hit_wb() - mf=%p\n", mf);
+  //printf("l1_cache::wr_hit_wb() - mf=%p\n", mf);
   new_addr_type block_addr = m_config.block_addr(addr);
 	m_tag_array->access(block_addr,time,cache_index); // update LRU state //TODO
 	cache_block_t &block = m_tag_array->get_block(cache_index);
@@ -1213,7 +1213,7 @@ cache_request_status data_cache::wr_hit_we(new_addr_type addr, unsigned cache_in
 }
 
 cache_request_status l1_cache::wr_hit_we(new_addr_type addr, unsigned cache_index, mem_fetch *mf, unsigned time, std::list<cache_event> &events, enum cache_request_status status ){
-  printf("l1_cache::wr_hit_we() - mf=%p\n", mf);
+  //printf("l1_cache::wr_hit_we() - mf=%p\n", mf);
   if(miss_queue_full(0))
 		return RESERVATION_FAIL; // cannot handle request this cycle
 
@@ -1237,7 +1237,7 @@ enum cache_request_status data_cache::wr_hit_global_we_local_wb(new_addr_type ad
 }
 
 enum cache_request_status l1_cache::wr_hit_global_we_local_wb(new_addr_type addr, unsigned cache_index, mem_fetch *mf, unsigned time, std::list<cache_event> &events, enum cache_request_status status ){
-  printf("l1_cache::wr_hit_we_local_wb() - mf=%p\n", mf);
+  //printf("l1_cache::wr_hit_we_local_wb() - mf=%p\n", mf);
   bool evict = (mf->get_access_type() == GLOBAL_ACC_W); // evict a line that hits on global memory write
 	if(evict)
 		return wr_hit_we(addr, cache_index, mf, time, events, status); // Write-evict
@@ -1398,7 +1398,7 @@ l1_cache::wr_miss_no_wa( new_addr_type addr,
                            std::list<cache_event> &events,
                            enum cache_request_status status )
 {
-    printf("l1_cache::wr_miss_no_wa() - mf=%p\n", mf);
+    //printf("l1_cache::wr_miss_no_wa() - mf=%p\n", mf);
     if(miss_queue_full(0))
         return RESERVATION_FAIL; // cannot handle request this cycle
 
@@ -1447,7 +1447,7 @@ l1_cache::rd_hit_base( new_addr_type addr,
     m_tag_array->access(block_addr,time,cache_index);
 
 
-    printf("l1_cache::rd_hit_base() - mf=%p\n", mf);
+    //printf("l1_cache::rd_hit_base() - mf=%p\n", mf);
     // Atomics treated as global read/write requests - Perform read, mark line as
     // MODIFIED
     if(mf->isatomic()){
@@ -1505,7 +1505,7 @@ l1_cache::rd_miss_base( new_addr_type addr,
                           unsigned time,
                           std::list<cache_event> &events,
                           enum cache_request_status status ){
-    printf("l1_cache::rd_miss_base() - mf=%p\n", mf);
+    //printf("l1_cache::rd_miss_base() - mf=%p\n", mf);
     if(miss_queue_full(1))
         // cannot handle request this cycle
         // (might need to generate two requests)
@@ -1515,7 +1515,7 @@ l1_cache::rd_miss_base( new_addr_type addr,
     bool do_miss = false;
     bool wb = false;
     cache_block_t evicted;
-    printf("l1_cache::rd_miss_base() - mf=%p\n", mf);
+    //printf("l1_cache::rd_miss_base() - mf=%p\n", mf);
     send_read_request( addr,
                        block_addr,
                        cache_index,
@@ -1627,7 +1627,7 @@ l1_cache::process_tag_probe( bool wr,
     // data_cache constructor to reflect the corresponding cache configuration
     // options. Function pointers were used to avoid many long conditional
     // branches resulting from many cache configuration options.
-    printf("l1_cache::process_tag_probe() - mf=%p\n", mf);
+    //printf("l1_cache::process_tag_probe() - mf=%p\n", mf);
     cache_request_status access_status = probe_status;
     //JUMP
     if(wr){ // Write
@@ -1693,7 +1693,7 @@ l1_cache::access( new_addr_type addr,
                   unsigned time,
                   std::list<cache_event> &events )
 {
-    printf("l1_cache::access() - mf=%p\n", mf);
+    //printf("l1_cache::access() - mf=%p\n", mf);
     assert( mf->get_data_size() <= m_config.get_line_sz());
     bool wr = mf->get_is_write();
     new_addr_type block_addr = m_config.block_addr(addr);
@@ -1716,18 +1716,18 @@ enum tag_store_request_status l1_cache::process_tag_store_probe(enum tag_store_r
 
   if(status == T_HIT)
   {
-    printf("process_tag_store_probe() - tag_store HIT\n");
+    //printf("process_tag_store_probe() - tag_store HIT\n");
     enum tag_block_position_status block_pos_status = m_tag_store->get_tag_block_position(tag_index);
     if(block_pos_status==DS_VALID) // in DS
     {
-      printf("process_tag_store_probe() - return T_HIT (block_pos_status=DS_VALID)\n");
+      //printf("process_tag_store_probe() - return T_HIT (block_pos_status=DS_VALID)\n");
       unsigned rc = m_tag_store->inc_tag_block_rc(tag_index); // Increment RC
       return T_HIT; // go to DS
     }
     else if(block_pos_status==DS_RESERVED)
     {
       //TEMP ?
-      printf("process_tag_store_probe() - return T_HIT_RESERVED (block_pos_status=DS_RESERVED)\n");
+      //printf("process_tag_store_probe() - return T_HIT_RESERVED (block_pos_status=DS_RESERVED)\n");
       return T_HIT_RESERVED;
     }
     else // pos is DS_INVALID - not in DS
@@ -1740,45 +1740,45 @@ enum tag_store_request_status l1_cache::process_tag_store_probe(enum tag_store_r
         //printf("process_tag_store_probe() - return MISS for DS, RC > 2\n");
         // reserve the position - the DS entry is on its way to being filled
 
-        printf("process_tag_store_probe() - return T_MISS (block_pos_status=DS_RESERVED, rc = %u)\n", rc);
+        //printf("process_tag_store_probe() - return T_MISS (block_pos_status=DS_RESERVED, rc = %u)\n", rc);
         m_tag_store->reserve_tag_block_position(tag_index);
         return T_MISS; // allocate new entry in DS
       }
       else
       {
         //printf("process_tag_store_probe() - return BYPASS for DS, RC <= 2\n");
-        printf("process_tag_store_probe() - return T_BYPASS (block_pos_status=DS_INVALID, rc = %u)\n", rc);
+        //printf("process_tag_store_probe() - return T_BYPASS (block_pos_status=DS_INVALID, rc = %u)\n", rc);
         return T_BYPASS; //bypass DS
       }
     }
   }
   else if (status == T_HIT_RESERVED)
   {
-    printf("process_tag_store_probe() - return T_HIT_RESERVED (status=T_HIT_RESERVED)\n");
+    //printf("process_tag_store_probe() - return T_HIT_RESERVED (status=T_HIT_RESERVED)\n");
     //m_tag_store->inc_tag_block_rc(tag_index);
     return T_HIT_RESERVED;
   }
   else if(status == T_RESERVATION_FAIL)
   {
     // if you can't allocate, bypass
-    printf("process_tag_store_probe() - return T_RESERVATION_FAIL (status=T_RESERVATION_FAIL)\n");
+    //printf("process_tag_store_probe() - return T_RESERVATION_FAIL (status=T_RESERVATION_FAIL)\n");
     return T_RESERVATION_FAIL;
   }
   else if(status == T_MISS)
   {
     //printf("process_tag_store_probe() - tag_store MISS\n");
     //alloc new tag_store entry
-    printf("\ttag_store->allocate() - tag_index=%u\n",tag_index);
+    //printf("\ttag_store->allocate() - tag_index=%u\n",tag_index);
     m_tag_store->allocate_new_entry(tag, tag_index);
     //printf("process_tag_store_probe() - allocated new tag_store entry\n");
     //printf("process_tag_store_probe() - return BYPASS for DS\n");
     //bypass
 
-    printf("process_tag_store_probe() - return T_FIRST_BYPASS (status=T_MISS)\n");
+    //printf("process_tag_store_probe() - return T_FIRST_BYPASS (status=T_MISS)\n");
     return T_FIRST_BYPASS;
   }
 
-  printf("process_tag_store_probe() - return %u\n", (unsigned) status);
+  //printf("process_tag_store_probe() - return %u\n", (unsigned) status);
   return status;
 }
 

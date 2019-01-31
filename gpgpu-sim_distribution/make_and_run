@@ -8,5 +8,4 @@ clear
 make -j > out.txt
 cd ../benchmarks/rodinia/$benchmark
 ./LUD.sh
-mv ../../../output/rodinia/($benchmark).OUT ../../../output/rodinia/($benchmark).OUT.MOD
-rm ../../../output/rodinia/($benchmark).OUT
+mv ../../../output/rodinia/$benchmark.OUT ../../../output/rodinia/$benchmark.OUT.MOD
