@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "Running Rodinia PF Benchmark"
 
-myc=$(pwd)
+pf=$(pwd)
 cd ../../..
 repo=$(pwd)
 test_dir=$repo/benchmarks/test
