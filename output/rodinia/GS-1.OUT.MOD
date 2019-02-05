@@ -173,8 +173,8 @@ GPGPU-Sim uArch: performance model initialization complete.
 GPGPU-Sim PTX: __cudaRegisterFatBinary, fat_cubin_handle = 1, filename=gaussian.cu
 self exe links to: /home/gpgpu-sim/Documents/Dynamic_GPU_Cache_Bypass_Project/benchmarks/test/gaussian-rodinia-3.1
 Running md5sum using "md5sum /home/gpgpu-sim/Documents/Dynamic_GPU_Cache_Bypass_Project/benchmarks/test/gaussian-rodinia-3.1 "
-Running cuobjdump using "$CUDA_INSTALL_PATH/bin/cuobjdump -ptx -elf -sass /home/gpgpu-sim/Documents/Dynamic_GPU_Cache_Bypass_Project/benchmarks/test/gaussian-rodinia-3.1 > _cuobjdump_complete_output_pd54Zt"
-Parsing file _cuobjdump_complete_output_pd54Zt
+Running cuobjdump using "$CUDA_INSTALL_PATH/bin/cuobjdump -ptx -elf -sass /home/gpgpu-sim/Documents/Dynamic_GPU_Cache_Bypass_Project/benchmarks/test/gaussian-rodinia-3.1 > _cuobjdump_complete_output_I57wam"
+Parsing file _cuobjdump_complete_output_I57wam
 ######### cuobjdump parser ########
 ## Adding new section PTX
 Adding ptx filename: _cuobjdump_1.ptx
@@ -236,12 +236,12 @@ GPGPU-Sim PTX: ... end of reconvergence points for _Z4Fan2PfS_S_iii
 GPGPU-Sim PTX: ... done pre-decoding instructions for '_Z4Fan2PfS_S_iii'.
 GPGPU-Sim PTX: finished parsing EMBEDDED .ptx file _1.ptx
 Adding _cuobjdump_3.ptx with cubin handle 1
-GPGPU-Sim PTX: extracting embedded .ptx to temporary file "_ptx_dFTwBr"
-Running: cat _ptx_dFTwBr | sed 's/.version 1.5/.version 1.4/' | sed 's/, texmode_independent//' | sed 's/\(\.extern \.const\[1\] .b8 \w\+\)\[\]/\1\[1\]/' | sed 's/const\[.\]/const\[0\]/g' > _ptx2_xFQ1cp
-GPGPU-Sim PTX: generating ptxinfo using "$CUDA_INSTALL_PATH/bin/ptxas --gpu-name=sm_20 -v _ptx2_xFQ1cp --output-file  /dev/null 2> _ptx_dFTwBrinfo"
+GPGPU-Sim PTX: extracting embedded .ptx to temporary file "_ptx_ytruW6"
+Running: cat _ptx_ytruW6 | sed 's/.version 1.5/.version 1.4/' | sed 's/, texmode_independent//' | sed 's/\(\.extern \.const\[1\] .b8 \w\+\)\[\]/\1\[1\]/' | sed 's/const\[.\]/const\[0\]/g' > _ptx2_h7puIR
+GPGPU-Sim PTX: generating ptxinfo using "$CUDA_INSTALL_PATH/bin/ptxas --gpu-name=sm_20 -v _ptx2_h7puIR --output-file  /dev/null 2> _ptx_ytruW6info"
 GPGPU-Sim PTX: Kernel '_Z4Fan1PfS_ii' : regs=12, lmem=0, smem=0, cmem=64
 GPGPU-Sim PTX: Kernel '_Z4Fan2PfS_S_iii' : regs=12, lmem=0, smem=0, cmem=68
-GPGPU-Sim PTX: removing ptxinfo using "rm -f _ptx_dFTwBr _ptx2_xFQ1cp _ptx_dFTwBrinfo"
+GPGPU-Sim PTX: removing ptxinfo using "rm -f _ptx_ytruW6 _ptx2_h7puIR _ptx_ytruW6info"
 GPGPU-Sim PTX: loading globals with explicit initializers... 
 GPGPU-Sim PTX: finished loading globals (0 bytes total).
 GPGPU-Sim PTX: loading constants with explicit initializers...  done.
@@ -255,7 +255,7 @@ kernel '_Z4Fan1PfS_ii' transfer to GPU hardware scheduler
 GPGPU-Sim uArch: Shader 1 bind to kernel 1 '_Z4Fan1PfS_ii'
 GPGPU-Sim uArch: CTA/core = 3, limited by: threads
 GPGPU-Sim uArch: core:  1, cta: 0 initialized @(1,0)
-GPGPU-Sim uArch: cycles simulated: 500  inst.: 0 (ipc= 0.0) sim_rate=0 (inst/sec) elapsed = 0:0:00:02 / Fri Feb  1 10:25:08 2019
+GPGPU-Sim uArch: cycles simulated: 500  inst.: 0 (ipc= 0.0) sim_rate=0 (inst/sec) elapsed = 0:0:00:01 / Tue Feb  5 16:25:39 2019
 GPGPU-Sim uArch: Shader 1 finished CTA #0 (1908,0), 0 CTAs running
 GPGPU-Sim uArch: Shader 1 empty (release kernel 1 '_Z4Fan1PfS_ii').
 GPGPU-Sim uArch: GPU detected kernel '_Z4Fan1PfS_ii' finished on shader 1.
@@ -270,7 +270,7 @@ gpu_tot_ipc =       3.7941
 gpu_tot_issued_cta = 0
 gpu_stall_dramfull = 0
 gpu_stall_icnt2sh    = 0
-gpu_total_sim_rate=2414
+gpu_total_sim_rate=7243
 
 ========= Core cache stats =========
 L1I_cache:
@@ -495,7 +495,7 @@ MSHR contents
 
 Cache L2_bank_005:
 MSHR contents
-MSHR: tag=0x80000000, atomic=0 1 entries : 0x7fe1fc0ed050 :  mf: uid=   484, sid01:w00, part=2, addr=0x80000000, load , size=64, unknown  status = IN_PARTITION_DRAM (1908), 
+MSHR: tag=0x80000000, atomic=0 1 entries : 0x7f2d3c108160 :  mf: uid=   484, sid01:w00, part=2, addr=0x80000000, load , size=64, unknown  status = IN_PARTITION_DRAM (1908), 
 
 In Dram Latency Queue (total = 0): 
 DRAM[2]: 16 bks, busW=4 BL=8 CL=12, tRRD=2 tCCD=6, tRCD=12 tRAS=28 tRP=12 tRC=40
@@ -645,9 +645,9 @@ Hops average = 1 (1 samples)
 ----------------------------END-of-Interconnect-DETAILS-------------------------
 
 
-gpgpu_simulation_time = 0 days, 0 hrs, 0 min, 3 sec (3 sec)
-gpgpu_simulation_rate = 2414 (inst/sec)
-gpgpu_simulation_rate = 636 (cycle/sec)
+gpgpu_simulation_time = 0 days, 0 hrs, 0 min, 1 sec (1 sec)
+gpgpu_simulation_rate = 7243 (inst/sec)
+gpgpu_simulation_rate = 1909 (cycle/sec)
 GPGPU-Sim: synchronize waiting for inactive GPU simulation
 GPGPU-Sim API: Stream Manager State
 GPGPU-Sim: detected inactive GPU simulation thread
@@ -658,8 +658,6 @@ kernel '_Z4Fan2PfS_S_iii' transfer to GPU hardware scheduler
 GPGPU-Sim uArch: Shader 2 bind to kernel 2 '_Z4Fan2PfS_S_iii'
 GPGPU-Sim uArch: CTA/core = 8, limited by: cta_limit
 GPGPU-Sim uArch: core:  2, cta: 0 initialized @(1,1909)
-GPGPU-Sim uArch: cycles simulated: 2409  inst.: 7371 (ipc= 0.3) sim_rate=2457 (inst/sec) elapsed = 0:0:00:03 / Fri Feb  1 10:25:09 2019
-GPGPU-Sim uArch: cycles simulated: 3909  inst.: 7905 (ipc= 0.3) sim_rate=1976 (inst/sec) elapsed = 0:0:00:04 / Fri Feb  1 10:25:10 2019
 GPGPU-Sim uArch: Shader 2 finished CTA #0 (2098,1909), 0 CTAs running
 GPGPU-Sim uArch: Shader 2 empty (release kernel 2 '_Z4Fan2PfS_S_iii').
 GPGPU-Sim uArch: GPU detected kernel '_Z4Fan2PfS_S_iii' finished on shader 2.
@@ -674,7 +672,7 @@ gpu_tot_ipc =       1.9723
 gpu_tot_issued_cta = 0
 gpu_stall_dramfull = 0
 gpu_stall_icnt2sh    = 0
-gpu_total_sim_rate=1976
+gpu_total_sim_rate=7905
 
 ========= Core cache stats =========
 L1I_cache:
@@ -1052,9 +1050,9 @@ Hops average = 1 (2 samples)
 ----------------------------END-of-Interconnect-DETAILS-------------------------
 
 
-gpgpu_simulation_time = 0 days, 0 hrs, 0 min, 4 sec (4 sec)
-gpgpu_simulation_rate = 1976 (inst/sec)
-gpgpu_simulation_rate = 1002 (cycle/sec)
+gpgpu_simulation_time = 0 days, 0 hrs, 0 min, 1 sec (1 sec)
+gpgpu_simulation_rate = 7905 (inst/sec)
+gpgpu_simulation_rate = 4008 (cycle/sec)
 GPGPU-Sim: synchronize waiting for inactive GPU simulation
 GPGPU-Sim API: Stream Manager State
 GPGPU-Sim: detected inactive GPU simulation thread
@@ -1065,10 +1063,10 @@ kernel '_Z4Fan1PfS_ii' transfer to GPU hardware scheduler
 GPGPU-Sim uArch: Shader 3 bind to kernel 3 '_Z4Fan1PfS_ii'
 GPGPU-Sim uArch: CTA/core = 3, limited by: threads
 GPGPU-Sim uArch: core:  3, cta: 0 initialized @(1,4008)
+GPGPU-Sim uArch: cycles simulated: 4508  inst.: 15047 (ipc=14.3) sim_rate=7523 (inst/sec) elapsed = 0:0:00:02 / Tue Feb  5 16:25:41 2019
 GPGPU-Sim uArch: Shader 3 finished CTA #0 (1109,4008), 0 CTAs running
 GPGPU-Sim uArch: Shader 3 empty (release kernel 3 '_Z4Fan1PfS_ii').
 GPGPU-Sim uArch: GPU detected kernel '_Z4Fan1PfS_ii' finished on shader 3.
-GPGPU-Sim: synchronize waiting for inactive GPU simulation
 kernel_name = _Z4Fan1PfS_ii 
 kernel_launch_uid = 3 
 gpu_sim_cycle = 1110
@@ -1080,7 +1078,7 @@ gpu_tot_ipc =       2.9549
 gpu_tot_issued_cta = 0
 gpu_stall_dramfull = 0
 gpu_stall_icnt2sh    = 0
-gpu_total_sim_rate=3024
+gpu_total_sim_rate=7561
 
 ========= Core cache stats =========
 L1I_cache:
@@ -1456,12 +1454,13 @@ Injected packet size average = 2.24576 (3 samples)
 Accepted packet size average = 2.24576 (3 samples)
 Hops average = 1 (3 samples)
 ----------------------------END-of-Interconnect-DETAILS-------------------------
+
+
+gpgpu_simulation_time = 0 days, 0 hrs, 0 min, 2 sec (2 sec)
+gpgpu_simulation_rate = 7561 (inst/sec)
+gpgpu_simulation_rate = 2559 (cycle/sec)
+GPGPU-Sim: synchronize waiting for inactive GPU simulation
 GPGPU-Sim API: Stream Manager State
-
-
-gpgpu_simulation_time = 0 days, 0 hrs, 0 min, 5 sec (5 sec)
-gpgpu_simulation_rate = 3024 (inst/sec)
-gpgpu_simulation_rate = 1023 (cycle/sec)
 GPGPU-Sim: detected inactive GPU simulation thread
 
 GPGPU-Sim PTX: cudaLaunch for 0x0x40219f (mode=performance simulation) on stream 0
@@ -1470,7 +1469,6 @@ kernel '_Z4Fan2PfS_S_iii' transfer to GPU hardware scheduler
 GPGPU-Sim uArch: Shader 4 bind to kernel 4 '_Z4Fan2PfS_S_iii'
 GPGPU-Sim uArch: CTA/core = 8, limited by: cta_limit
 GPGPU-Sim uArch: core:  4, cta: 0 initialized @(1,5118)
-GPGPU-Sim uArch: cycles simulated: 5618  inst.: 15371 (ipc= 0.5) sim_rate=3074 (inst/sec) elapsed = 0:0:00:05 / Fri Feb  1 10:25:11 2019
 GPGPU-Sim uArch: Shader 4 finished CTA #0 (1595,5118), 0 CTAs running
 GPGPU-Sim uArch: Shader 4 empty (release kernel 4 '_Z4Fan2PfS_S_iii').
 GPGPU-Sim uArch: GPU detected kernel '_Z4Fan2PfS_S_iii' finished on shader 4.
@@ -1485,7 +1483,7 @@ gpu_tot_ipc =       2.3254
 gpu_tot_issued_cta = 0
 gpu_stall_dramfull = 0
 gpu_stall_icnt2sh    = 0
-gpu_total_sim_rate=3122
+gpu_total_sim_rate=7806
 
 ========= Core cache stats =========
 L1I_cache:
@@ -1863,9 +1861,9 @@ Hops average = 1 (4 samples)
 ----------------------------END-of-Interconnect-DETAILS-------------------------
 
 
-gpgpu_simulation_time = 0 days, 0 hrs, 0 min, 5 sec (5 sec)
-gpgpu_simulation_rate = 3122 (inst/sec)
-gpgpu_simulation_rate = 1342 (cycle/sec)
+gpgpu_simulation_time = 0 days, 0 hrs, 0 min, 2 sec (2 sec)
+gpgpu_simulation_rate = 7806 (inst/sec)
+gpgpu_simulation_rate = 3357 (cycle/sec)
 GPGPU-Sim: synchronize waiting for inactive GPU simulation
 GPGPU-Sim API: Stream Manager State
 GPGPU-Sim: detected inactive GPU simulation thread
@@ -1876,7 +1874,7 @@ kernel '_Z4Fan1PfS_ii' transfer to GPU hardware scheduler
 GPGPU-Sim uArch: Shader 5 bind to kernel 5 '_Z4Fan1PfS_ii'
 GPGPU-Sim uArch: CTA/core = 3, limited by: threads
 GPGPU-Sim uArch: core:  5, cta: 0 initialized @(1,6714)
-GPGPU-Sim uArch: cycles simulated: 7214  inst.: 22752 (ipc=14.3) sim_rate=3792 (inst/sec) elapsed = 0:0:00:06 / Fri Feb  1 10:25:12 2019
+GPGPU-Sim uArch: cycles simulated: 7214  inst.: 22752 (ipc=14.3) sim_rate=7584 (inst/sec) elapsed = 0:0:00:03 / Tue Feb  5 16:25:42 2019
 GPGPU-Sim uArch: Shader 5 finished CTA #0 (1107,6714), 0 CTAs running
 GPGPU-Sim uArch: Shader 5 empty (release kernel 5 '_Z4Fan1PfS_ii').
 GPGPU-Sim uArch: GPU detected kernel '_Z4Fan1PfS_ii' finished on shader 5.
@@ -1891,7 +1889,7 @@ gpu_tot_ipc =       2.9156
 gpu_tot_issued_cta = 0
 gpu_stall_dramfull = 0
 gpu_stall_icnt2sh    = 0
-gpu_total_sim_rate=3801
+gpu_total_sim_rate=7602
 
 ========= Core cache stats =========
 L1I_cache:
@@ -2269,9 +2267,9 @@ Hops average = 1 (5 samples)
 ----------------------------END-of-Interconnect-DETAILS-------------------------
 
 
-gpgpu_simulation_time = 0 days, 0 hrs, 0 min, 6 sec (6 sec)
-gpgpu_simulation_rate = 3801 (inst/sec)
-gpgpu_simulation_rate = 1303 (cycle/sec)
+gpgpu_simulation_time = 0 days, 0 hrs, 0 min, 3 sec (3 sec)
+gpgpu_simulation_rate = 7602 (inst/sec)
+gpgpu_simulation_rate = 2607 (cycle/sec)
 GPGPU-Sim: synchronize waiting for inactive GPU simulation
 GPGPU-Sim API: Stream Manager State
 GPGPU-Sim: detected inactive GPU simulation thread
@@ -2282,7 +2280,6 @@ kernel '_Z4Fan2PfS_S_iii' transfer to GPU hardware scheduler
 GPGPU-Sim uArch: Shader 6 bind to kernel 6 '_Z4Fan2PfS_S_iii'
 GPGPU-Sim uArch: CTA/core = 8, limited by: cta_limit
 GPGPU-Sim uArch: core:  6, cta: 0 initialized @(1,7822)
-GPGPU-Sim uArch: cycles simulated: 8822  inst.: 23136 (ipc= 0.3) sim_rate=3305 (inst/sec) elapsed = 0:0:00:07 / Fri Feb  1 10:25:13 2019
 GPGPU-Sim uArch: Shader 6 finished CTA #0 (1595,7822), 0 CTAs running
 GPGPU-Sim uArch: Shader 6 empty (release kernel 6 '_Z4Fan2PfS_S_iii').
 GPGPU-Sim uArch: GPU detected kernel '_Z4Fan2PfS_S_iii' finished on shader 6.
@@ -2297,7 +2294,7 @@ gpu_tot_ipc =       2.4598
 gpu_tot_issued_cta = 0
 gpu_stall_dramfull = 0
 gpu_stall_icnt2sh    = 0
-gpu_total_sim_rate=3309
+gpu_total_sim_rate=7722
 
 ========= Core cache stats =========
 L1I_cache:
@@ -2675,9 +2672,9 @@ Hops average = 1 (6 samples)
 ----------------------------END-of-Interconnect-DETAILS-------------------------
 
 
-gpgpu_simulation_time = 0 days, 0 hrs, 0 min, 7 sec (7 sec)
-gpgpu_simulation_rate = 3309 (inst/sec)
-gpgpu_simulation_rate = 1345 (cycle/sec)
+gpgpu_simulation_time = 0 days, 0 hrs, 0 min, 3 sec (3 sec)
+gpgpu_simulation_rate = 7722 (inst/sec)
+gpgpu_simulation_rate = 3139 (cycle/sec)
 GPGPU-Sim: synchronize waiting for inactive GPU simulation
 GPGPU-Sim API: Stream Manager State
 GPGPU-Sim: detected inactive GPU simulation thread
@@ -2700,5 +2697,5 @@ The final solution is:
 0.70 0.00 -0.40 -0.50 
 
 
-Time total (including memory transfers)	5.694739 sec
-Time for CUDA kernels:	5.683117 sec
+Time total (including memory transfers)	3.058562 sec
+Time for CUDA kernels:	3.052462 sec
