@@ -1,5 +1,5 @@
 #!/bin/bash
-benchmark="LUD"
+benchmark='NW'
 rm ~/gpgpu-sim_distribution
 dir=$(pwd)
 ln -s $dir ~/gpgpu-sim_distribution
@@ -7,5 +7,5 @@ set -e
 clear
 make -j > out.txt
 cd ../benchmarks/rodinia/$benchmark
-./LUD.sh
+./$benchmark.sh
 mv ../../../output/rodinia/$benchmark.OUT ../../../output/rodinia/$benchmark.OUT.MOD
